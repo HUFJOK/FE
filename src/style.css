@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+@layer base {
+  html,
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
+}
+
 @theme {
   /*primary*/
   --color-primary-100: #f7efee;
@@ -9,6 +34,15 @@
   --color-primary-500: #8d5449;
   --color-primary-600: #5f372f;
   --color-primary-700: #351c17;
+
+  /*secondary*/
+  --color-secondary-100: #f4eae8;
+  --color-secondary-200: #dfbcb7;
+  --color-secondary-300: #cf8c81;
+  --color-secondary-400: #a8675b;
+  --color-secondary-500: #784940;
+  --color-secondary-600: #4c2c26;
+  --color-secondary-700: #24120f;
 
   /*gray*/
   --color-gray-100: #f1f0f0;
@@ -47,5 +81,7 @@
   /* 간단한 컴포넌트 */
   .btn {
     @apply px-5 py-2.5 rounded-xl bg-primary-600 text-white text-center cursor-pointer select-none;
+    @apply hover:bg-secondary-600;
+    @apply active:bg-primary-700;
   }
 }
