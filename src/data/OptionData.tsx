@@ -1,9 +1,10 @@
-interface Option {
+export interface Option {
   index: number;
   value: string;
 }
 
-export const MajorData: Option[] = [
+// 전공 옵션
+export const MajorOptions: Option[] = [
   { index: 1, value: "철학과" },
   { index: 2, value: "사학과" },
   { index: 3, value: "언어인지과학과" },
@@ -38,4 +39,36 @@ export const MajorData: Option[] = [
   { index: 32, value: "자유전공학부(글로벌)" },
   { index: 33, value: "기후변화융합학부" },
   { index: 34, value: "없음" },
+];
+
+// 연도 옵션
+const currentYear = new Date().getFullYear();
+export const YearOptions: Option[] = Array.from({ length: 11 }, (_, i) => {
+  const year = currentYear - i;
+
+  return {
+    index: i,
+    value: String(year),
+  };
+});
+
+// 학기 옵션
+export const SemesterOptions: Option[] = [
+  { index: 0, value: "1" },
+  { index: 1, value: "2" },
+];
+
+// 학년 옵션
+export const GradeOptions: Option[] = [
+  { index: 0, value: "1학년" },
+  { index: 1, value: "2학년" },
+  { index: 2, value: "3학년" },
+  { index: 3, value: "4학년" },
+];
+
+// 구분 옵션
+export const CategoryOptions: Option[] = [
+  { index: 0, value: "전공" },
+  { index: 1, value: "교양" },
+  { index: 2, value: "기초" },
 ];

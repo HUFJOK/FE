@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.svg";
+import Button from "./Button";
 
 const menuItems = [
   { name: "MAIN", path: "/main" },
@@ -44,11 +45,9 @@ export default function Navigation(): React.JSX.Element {
         })}
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-6">
         <div className="title-sm text-primary-600">{point}P</div>
-        <div className="btn body-lg" onClick={logout}>
-          로그아웃
-        </div>
+        <Button text="로그아웃" font="body-lg" onClick={logout} />
       </div>
     </div>
   );

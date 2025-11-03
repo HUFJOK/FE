@@ -80,8 +80,6 @@
 
   /* 간단한 컴포넌트 */
   .btn {
-    @apply px-5 py-2.5 rounded-xl bg-primary-600 text-white text-center cursor-pointer select-none;
-    @apply hover:bg-secondary-600;
-    @apply active:bg-primary-700;
+    @apply px-5 py-2.5 min-w-30 rounded-xl bg-primary-600 text-white text-center whitespace-nowrap cursor-pointer;
   }
 }

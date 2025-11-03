@@ -7,6 +7,7 @@ interface InputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
+  font?: string;
 }
 
 export default function Input({
@@ -16,15 +17,18 @@ export default function Input({
   onChange,
   placeholder,
   disabled = false,
+  font = "body-lg",
 }: InputProps): React.JSX.Element {
+  const isTitleFont: boolean = font.startsWith("title");
+
   return (
     <input
       className={`
-        w-full min-w-60 px-5 py-2.5 border rounded-xl body-lg text-gray-700 bg-white
+        w-full min-w-30 ${isTitleFont ? "p-5" : "px-5 py-2.5"} border rounded-xl ${font} text-gray-700 whitespace-nowrap bg-white
         ${
           !disabled
-            ? "cursor-pointer border-gray-400 hover:border-gray-600 active:border-gray-600"
-            : "cursor-default border-gray-200 hover:border-gray-200 active:border-gray-200"
+            ? "cursor-text border-gray-400 hover:border-gray-600 focus:border-gray-600 focus:outline-none"
+            : "cursor-default border-gray-200"
         }
       `}
       type={type}

@@ -12,6 +12,7 @@ interface DropdownProps {
   onChange: (option: Option) => void;
   placeholder?: string;
   disabled?: boolean;
+  font?: string;
 }
 
 export default function Dropdown({
@@ -20,6 +21,7 @@ export default function Dropdown({
   onChange,
   placeholder,
   disabled = false,
+  font = "body-lg",
 }: DropdownProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -53,10 +55,10 @@ export default function Dropdown({
   };
 
   return (
-    <div className="relative w-full min-w-60" ref={dropdownRef}>
+    <div className="relative w-full min-w-30" ref={dropdownRef}>
       <div
         className={`
-          px-5 py-2.5 flex justify-between items-center border rounded-xl body-lg text-gray-700 bg-white
+          px-5 py-2.5 flex justify-between items-center border rounded-xl ${font} text-gray-700 whitespace-nowrap bg-white
           ${
             !disabled
               ? isOpen
