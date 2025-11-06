@@ -67,7 +67,7 @@ export const GradeOptions: Option[] = [
 ];
 
 // 구분 옵션
-export const CategoryOptions: Option[] = [
+export const TypeOptions: Option[] = [
   { index: 0, value: "전공" },
   { index: 1, value: "교양" },
   { index: 2, value: "기초" },

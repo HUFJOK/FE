@@ -9,7 +9,7 @@ import {
   YearOptions,
   SemesterOptions,
   GradeOptions,
-  CategoryOptions,
+  TypeOptions,
 } from "../../data/OptionData";
 import type { Option } from "../../data/OptionData";
 
@@ -20,7 +20,7 @@ export default function DataUpload(): React.JSX.Element {
   const [semester, setSemester] = useState<Option | null>(null);
   const [professor, setProfessor] = useState<string>("");
   const [grade, setGrade] = useState<Option | null>(null);
-  const [category, setCategory] = useState<Option | null>(null);
+  const [type, setType] = useState<Option | null>(null);
   const [course, setCourse] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
@@ -28,7 +28,7 @@ export default function DataUpload(): React.JSX.Element {
     setYear(YearOptions[0]);
     setSemester(SemesterOptions[0]);
     setGrade(GradeOptions[0]);
-    setCategory(CategoryOptions[0]);
+    setType(TypeOptions[0]);
   }, []);
 
   const handleFileUpload = (): void => {
@@ -95,9 +95,9 @@ export default function DataUpload(): React.JSX.Element {
             </LabelField>
             <LabelField label="구분" color="gray-700" isFit={true}>
               <Dropdown
-                options={CategoryOptions}
-                value={category}
-                onChange={setCategory}
+                options={TypeOptions}
+                value={type}
+                onChange={setType}
                 font="body-md"
               />
             </LabelField>

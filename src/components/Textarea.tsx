@@ -20,11 +20,11 @@ export default function Textarea({
   return (
     <textarea
       className={`
-        w-full min-w-30 p-5 border rounded-xl body-md text-gray-700 bg-white resize-none
+        w-full min-w-30 p-5 border rounded-xl body-md text-gray-700 resize-none
         ${
           !disabled
-            ? "cursor-text border-gray-400 hover:border-gray-600 focus:border-primary-600 focus:outline-none"
-            : "cursor-default border-gray-200"
+            ? "cursor-text bg-white border-gray-400 hover:border-gray-600 focus:border-primary-600 focus:outline-none"
+            : "cursor-default bg-gray-100 border-gray-200"
         }
       `}
       rows={rows}
