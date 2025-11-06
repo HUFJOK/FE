@@ -19,7 +19,7 @@ export default function Navigation(): React.JSX.Element {
   };
 
   return (
-    <div className="flex justify-between items-center px-11 pt-10">
+    <div className="flex justify-between items-center mx-11 pt-10 pb-5 border-b-2 border-primary-600">
       <div className="w-20">
         <img src={logo} alt="로고" />
       </div>

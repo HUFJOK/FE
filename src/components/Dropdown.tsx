@@ -58,13 +58,13 @@ export default function Dropdown({
     <div className="relative w-full min-w-30" ref={dropdownRef}>
       <div
         className={`
-          px-5 py-2.5 flex justify-between items-center border rounded-xl ${font} text-gray-700 whitespace-nowrap bg-white
+          px-5 py-2.5 flex justify-between items-center border rounded-xl ${font} text-gray-700 whitespace-nowrap
           ${
             !disabled
               ? isOpen
-                ? "cursor-pointer border-primary-600"
-                : "cursor-pointer border-gray-400 hover:border-gray-600 active:border-gray-600"
-              : "cursor-default border-gray-200 hover:border-gray-200 active:border-gray-200"
+                ? "cursor-pointer bg-white border-primary-600"
+                : "cursor-pointer bg-white border-gray-400 hover:border-gray-600 active:border-gray-600"
+              : "cursor-default bg-gray-100 border-gray-200 hover:border-gray-200 active:border-gray-200"
           }
         `}
         onClick={handleDropdown}
