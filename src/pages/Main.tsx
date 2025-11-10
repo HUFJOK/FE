@@ -3,6 +3,9 @@ import { BiSearch, BiChevronDown, BiChevronUp, BiX } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
+import Input from "../components/Input";
+import Dropdown from "../components/Dropdown";
+import Button from "../components/Button";
 
 type DocItem = {
   id: number;
@@ -14,17 +17,18 @@ type DocItem = {
   type: string;
   downloads: number;
   reviews: number;
+  price: number;
 };
 
 const sample: DocItem[] = [
-  { id: 1, title: "2025-1 기계학습 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 125, reviews: 10 },
-  { id: 2, title: "2025-1 알고리즘 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 122, reviews: 15 },
-  { id: 3, title: "2025-1 알고리즘 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 127, reviews: 20 },
-  { id: 4, title: "2025-1 기계학습 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 126, reviews: 25 },
+  { id: 1, title: "2025-1 기계학습 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 125, reviews: 10, price: 200 },
+  { id: 2, title: "2025-1 알고리즘 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 122, reviews: 15, price: 300 },
+  { id: 3, title: "2025-1 알고리즘 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 127, reviews: 20, price: 250 },
+  { id: 4, title: "2025-1 기계학습 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 126, reviews: 25, price: 180 },
 ];
 
-const SEMESTER_OPTIONS = ["25-2","25-1","24-2","24-1","23-2","23-1","22-2","22-1","21-2","21-1","20-2","20-1"];
-const GRADE_OPTIONS = ["1학년","2학년","3학년","4학년"];
+const SEMESTER_OPTIONS = ["25-2", "25-1", "24-2", "24-1", "23-2", "23-1", "22-2", "22-1", "21-2", "21-1", "20-2", "20-1"];
+const GRADE_OPTIONS = ["1학년", "2학년", "3학년", "4학년"];
 
 /** 공통 칩 */
 function Chip({ children }: { children: React.ReactNode }) {
@@ -43,30 +47,7 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** 필터 트리거 (디자인 반영) */
-function FilterTrigger({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="
-        inline-flex items-center justify-center
-        w-[77px] h-[36px] px-[18px] py-[7px]
-        rounded-[20px] bg-primary-500 text-gray-100
-        font-[Pretendard] text-[16px] font-normal
-        leading-[140%] tracking-[-0.4px]
-        hover:brightness-110 active:translate-y-[1px]
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30
-      "
-      aria-haspopup="dialog"
-      aria-expanded="true"
-    >
-      필터링
-    </button>
-  );
-}
-
-/** 문서 카드 */
+/** 카드 */
 function DocCard({ item, onClick }: { item: DocItem; onClick: () => void }) {
   return (
     <article
@@ -87,9 +68,12 @@ function DocCard({ item, onClick }: { item: DocItem; onClick: () => void }) {
             {item.professor} &nbsp; {item.type}
           </p>
         </div>
+
+        {/* 우측 정보 */}
         <div className="ml-[16px] shrink-0 text-right font-[Pretendard] text-[14px] font-semibold text-[#5B5B5B]">
           <div>다운로드 {item.downloads}회</div>
           <div>리뷰 {item.reviews}개</div>
+          <div className="text-primary-600 mt-[2px]">{item.price}P</div>
         </div>
       </div>
     </article>
@@ -102,18 +86,14 @@ export default function MainContent(): React.JSX.Element {
   const [q, setQ] = useState("");
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-
-  // 정렬 상태
   const [sortLabel, setSortLabel] = useState<"추천순" | "다운로드순" | "최신순">("추천순");
 
-  // 필터 상태 (칩에 반영)
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [selectedMajor, setSelectedMajor] = useState<Option | null>(null);
-  const [selectprofessor, setProfessor] = useState<string>("");
+  const [selectProfessor, setProfessor] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // 검색 + 정렬
   const filteredSorted = useMemo(() => {
     let arr = !q.trim()
       ? [...sample]
@@ -121,7 +101,7 @@ export default function MainContent(): React.JSX.Element {
 
     switch (sortLabel) {
       case "추천순":
-        arr.sort((a, b) => (b.reviews - a.reviews) || (b.downloads - a.downloads));
+        arr.sort((a, b) => b.reviews - a.reviews || b.downloads - a.downloads);
         break;
       case "다운로드순":
         arr.sort((a, b) => b.downloads - a.downloads);
@@ -137,20 +117,12 @@ export default function MainContent(): React.JSX.Element {
     <section className="relative max-w-[1120px] mx-auto px-4 pt-[28px] pb-[60px]">
       {/* 올리기 버튼 */}
       <div className="absolute right-0 top-[20px]">
-        <button
-          type="button"
+        <Button
+          text="올리기"
+          font="body-lg"
+          color={600}
           onClick={() => navigate("../data/upload")}
-          className="
-            inline-flex items-center justify-center gap-[10px]
-            min-w-[93px] h-[38px] px-[23.5px]
-            rounded-[12px] bg-primary-600 text-white
-            font-[Pretendard] text-[18px] font-semibold leading-[140%] tracking-[-0.45px]
-            transition hover:brightness-110 active:translate-y-[1px]
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30
-          "
-        >
-          올리기
-        </button>
+        />
       </div>
 
       {/* 검색창 */}
@@ -162,54 +134,52 @@ export default function MainContent(): React.JSX.Element {
             rounded-[8px] border-2 bg-gray-100 border-primary-600
           "
         >
-          <input
+        <div 
+          className="[&_input]:bg-gray-100 [&_input]:border-none
+        [&_input]:outline-none">
+          <Input
+            id="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="검색어를 입력해 주세요."
-            className="
-              w-full bg-transparent outline-none
-              font-[Pretendard] font-semibold
-              text-[18px] leading-[140%] tracking-[-0.45px]
-              text-gray-400 placeholder-gray-400
-            "
+            font="body-md"
           />
+        </div>
           <BiSearch size={23} color="#5F372F" className="ml-[12px] shrink-0" />
         </div>
       </div>
 
       {/* 필터 + 칩 */}
       <div className="flex items-center justify-center gap-[10px] mb-[24px]">
-        <FilterTrigger onClick={() => setFilterOpen(true)} />
+        <div
+          className="
+            w-[77px] h-[36px] rounded-[20px]
+            flex items-center justify-center
+            [&>div]:w-full [&>div]:h-full [&>div]:rounded-[20px]
+            [&>div]:flex [&>div]:items-center [&>div]:justify-center
+          "
+        >
+          <Button text="필터링" font="body-sm" color={500} onClick={() => setFilterOpen(true)} isFull/>
+        </div>
         <Chip>{selectedSemester ?? "학기"}</Chip>
         <Chip>{selectedGrade ?? "학년"}</Chip>
         <Chip>{selectedMajor?.value ?? "전공"}</Chip>
-        <Chip>{selectprofessor || "교수"}</Chip>
+        <Chip>{selectProfessor || "교수"}</Chip>
         <Chip>{selectedCategory ?? "구분"}</Chip>
       </div>
 
-      {/* 정렬 드롭다운 */}
+      {/* 정렬 */}
       <div className="flex items-center justify-between mb-[18px]">
         <div className="relative">
-          <button
-            type="button"
+          <Button
+            text={`${sortLabel} ${sortOpen ? "▲" : "▼"}`}
+            font="body-sm"
+            color={600}
+            isOutline
             onClick={() => setSortOpen((s) => !s)}
-            className="
-              inline-flex items-center gap-[6px]
-              h-[34px] px-[12px] rounded-[8px] border-2 bg-white
-              font-[Pretendard] text-[14px] font-semibold
-              border-primary-600 text-primary-600
-            "
-          >
-            {sortLabel} {sortOpen ? <BiChevronUp /> : <BiChevronDown />}
-          </button>
-
+          />
           {sortOpen && (
-            <div
-              className="
-                absolute z-10 mt-2 w-[120px] rounded-[10px] border-2 bg-white
-                shadow-sm overflow-hidden border-primary-600
-              "
-            >
+            <div className="absolute z-10 mt-2 w-[120px] rounded-[10px] border-2 bg-white shadow-sm overflow-hidden border-primary-600">
               {(["추천순", "다운로드순", "최신순"] as const).map((it) => (
                 <button
                   key={it}
@@ -227,39 +197,25 @@ export default function MainContent(): React.JSX.Element {
         </div>
       </div>
 
-      {/* 리스트 */}
+      {/* 문서 리스트 */}
       <div className="flex flex-col gap-[16px]">
         {filteredSorted.map((item) => (
-          <DocCard
-            key={item.id}
-            item={item}
-            onClick={() => navigate("/data/detail")}
-          />
+          <DocCard key={item.id} item={item} onClick={() => navigate("/data/detail")} />
         ))}
       </div>
 
       {/* ===== 필터 팝업 ===== */}
       {filterOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-          {/* dim */}
           <button className="absolute inset-0 bg-black/30" onClick={() => setFilterOpen(false)} aria-label="닫기 배경" />
-
-          {/* panel */}
           <div
             className="
-              relative w-[343px] h-[530px]
-              rounded-[12px] bg-[#F6F1ED]
-              p-[25px] shadow-md
-              flex flex-col gap-[15px]
+              relative w-[400px] h-[500px]
+              rounded-[12px] bg-[#F6F1ED] border-primary-600
+              p-[25px] shadow-md flex flex-col gap-[15px]
             "
           >
-            {/* 닫기 */}
-            <button
-              type="button"
-              className="absolute right-[16px] top-[12px] p-1"
-              onClick={() => setFilterOpen(false)}
-              aria-label="닫기"
-            >
+            <button type="button" className="absolute right-[16px] top-[12px] p-1" onClick={() => setFilterOpen(false)} aria-label="닫기">
               <BiX size={24} color="#5F372F" />
             </button>
 
@@ -270,18 +226,24 @@ export default function MainContent(): React.JSX.Element {
                 {SEMESTER_OPTIONS.map((v) => {
                   const active = selectedSemester === v;
                   return (
-                    <button
+                    <div
                       key={v}
-                      type="button"
-                      onClick={() => setSelectedSemester(v)}
                       className={`
-                        h-[28px] px-[12px] rounded-[14px] border-2 text-[14px] font-[Pretendard]
-                        ${active ? "bg-primary-600 text-white" : "bg-white text-primary-600"}
-                        border-primary-600
+                        h-[28px]
+                        [&>div]:h-full [&>div]:px-[12px] [&>div]:rounded-[14px]
+                        [&>div]:flex [&>div]:items-center [&>div]:justify-center
+                        [&>div]:border [&>div]:border-primary-600
+                        ${!active ? "[&>div]:!bg-transparent [&>div:hover]:!bg-transparent" : ""}
                       `}
                     >
-                      {v}
-                    </button>
+                      <Button
+                        text={v}
+                        font="body-sm"
+                        color={600}
+                        isOutline={!active}
+                        onClick={() => setSelectedSemester(v)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -290,22 +252,28 @@ export default function MainContent(): React.JSX.Element {
             {/* 학년 */}
             <div className="flex flex-col gap-[3px]">
               <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">학년</div>
-              <div className="flex gap-[10px]">
+              <div className="flex flex-wrap gap-[10px]">
                 {GRADE_OPTIONS.map((v) => {
                   const active = selectedGrade === v;
                   return (
-                    <button
+                    <div
                       key={v}
-                      type="button"
-                      onClick={() => setSelectedGrade(v)}
                       className={`
-                        h-[28px] px-[12px] rounded-[14px] border-2 text-[14px] font-[Pretendard]
-                        ${active ? "bg-primary-600 text-white" : "bg-white text-primary-600"}
-                        border-primary-600
+                        h-[28px]
+                        [&>div]:h-full [&>div]:px-[12px] [&>div]:rounded-[14px]
+                        [&>div]:flex [&>div]:items-center [&>div]:justify-center
+                        [&>div]:border [&>div]:border-primary-600
+                        ${!active ? "[&>div]:!bg-transparent [&>div:hover]:!bg-transparent" : ""}
                       `}
                     >
-                      {v}
-                    </button>
+                      <Button
+                        text={v}
+                        font="body-sm"
+                        color={600}
+                        isOutline={!active}
+                        onClick={() => setSelectedGrade(v)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -313,73 +281,67 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 전공 */}
             <div className="flex flex-col gap-[3px]">
-              <label className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">전공</label>
-              <div className="relative">
-                <select
-                  value={selectedMajor?.index ?? ""}
-                  onChange={(e) => {
-                    const idx = Number(e.target.value);
-                    const found = MajorOptions.find((m) => m.index === idx) || null;
-                    setSelectedMajor(found);
-                  }}
-                  className="
-                    w-full h-[40px] rounded-[12px] border-2 bg-white px-[12px]
-                    font-[Pretendard] text-[14px] font-semibold
-                    focus:outline-none appearance-none
-                    border-primary-600 text-gray-700
-                  "
-                >
-                  <option value="" className="text-gray-400">선택</option>
-                  {MajorOptions.map((opt) => (
-                    <option key={opt.index} value={opt.index}>
-                      {opt.value}
-                    </option>
-                  ))}
-                </select>
-                <BiChevronDown
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                  size={20}
-                  color="#5F372F"
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">전공</div>
+              <div
+                className="
+                  [&_select]:!bg-[#F6F1ED] [&_select]:border [&_select]:border-primary-600
+                  [&_select]:!outline-none [&_select]:!ring-0
+                "
+              >
+                <Dropdown
+                  options={MajorOptions}
+                  value={selectedMajor}
+                  onChange={(v) => setSelectedMajor(v)}
+                  placeholder="전공"
+                  font="body-sm"
                 />
               </div>
             </div>
 
-            {/* 교수 */}
-            <div className="flex flex-col gap-[8px]">
-              <label className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">교수님</label>
-              <input
-                type="text"
-                value={selectprofessor}
-                onChange={(e) => setProfessor(e.target.value)}
-                placeholder="교수님 성함을 입력하세요"
+            {/* 교수님 */}
+            <div className="flex flex-col gap-[3px]">
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">교수님</div>
+              <div
                 className="
-                  w-full h-[40px] rounded-[12px] border-2 bg-white px-[12px]
-                  font-[Pretendard] text-[14px] font-semibold
-                  focus:outline-none
-                  border-primary-600 text-gray-700 placeholder-gray-400
+                  [&>input]:!bg-transparent [&>input]:border [&>input]:border-primary-600
+                  [&>input]:!outline-none [&>input]:!ring-0
                 "
-              />
+              >
+                <Input
+                  id="professor"
+                  value={selectProfessor}
+                  onChange={(e) => setProfessor(e.target.value)}
+                  placeholder="교수님 성함을 입력하세요"
+                  font="body-sm"
+                />
+              </div>
             </div>
 
             {/* 구분 */}
-            <div className="flex flex-col gap-[10px]">
+            <div className="flex flex-col gap-[3px]">
               <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">구분</div>
-              <div className="flex gap-[10px]">
+              <div className="flex flex-wrap gap-[10px]">
                 {["전공", "교양", "기초"].map((v) => {
                   const active = selectedCategory === v;
                   return (
-                    <button
+                    <div
                       key={v}
-                      type="button"
-                      onClick={() => setSelectedCategory(v)}
                       className={`
-                        h-[28px] px-[12px] rounded-[14px] border-2 text-[14px] font-[Pretendard]
-                        ${active ? "bg-primary-600 text-white" : "bg-white text-primary-600"}
-                        border-primary-600
+                        h-[28px]
+                        [&>div]:h-full [&>div]:px-[12px] [&>div]:rounded-[14px]
+                        [&>div]:flex [&>div]:items-center [&>div]:justify-center
+                        [&>div]:border [&>div]:border-primary-600
+                        ${!active ? "[&>div]:!bg-transparent [&>div:hover]:!bg-transparent" : ""}
                       `}
                     >
-                      {v}
-                    </button>
+                      <Button
+                        text={v}
+                        font="body-sm"
+                        color={600}
+                        isOutline={!active}
+                        onClick={() => setSelectedCategory(v)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -388,6 +350,9 @@ export default function MainContent(): React.JSX.Element {
         </div>
       )}
       {/* ===== /필터 팝업 ===== */}
+
+
+
     </section>
   );
 }

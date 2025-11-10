@@ -1,12 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
+import Button from "../../components/Button";
 
 export default function Login(): React.JSX.Element {
   const navigate = useNavigate();
 
+  //배포 후 소셜 로그인으로 변경
   const handleGoogleLogin = () => {
-    // 실제 연결 시 OAuth URL 사용
     navigate("/onboarding");
   };
 
@@ -21,21 +22,15 @@ export default function Login(): React.JSX.Element {
       />
 
       {/* 학교 구글 로그인 버튼 */}
-      <button
-        type="button"
-        onClick={handleGoogleLogin}
-        aria-label="학교 구글 로그인"
-        className={[
-          "btn",
-          "h-[90px] px-[122px] rounded-2xl", 
-          "text-[36px] tracking-[-0.9px] font-semibold",
-          "shadow-[0_10px_24px_rgba(0,0,0,0.16)]",
-          "hover:brightness-110 active:translate-y-[1px]",
-          "focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-600/30",
-        ].join(" ")}
-      >
-        학교 구글 로그인
-      </button>
+      <div className= {`w-[670px] h-[90px] flex items-center justify-center 
+                      [&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:h-full`}>
+        <Button
+          text="학교 구글 로그인"
+          font="title-md"
+          onClick={handleGoogleLogin}
+          isFull
+        />
+      </div>
     </main>
   );
 }

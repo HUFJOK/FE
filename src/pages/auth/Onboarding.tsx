@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
-import type { Option } from "../../data/OptionData";
 import { MajorOptions } from "../../data/OptionData";
-import { BiChevronDown } from "react-icons/bi";
+import type { Option } from "../../data/OptionData";
+import Button from "../../components/Button";
 
 export default function Onboarding(): React.JSX.Element {
   const navigate = useNavigate();
@@ -15,13 +15,12 @@ export default function Onboarding(): React.JSX.Element {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 서버 전송 로직
     navigate("/main");
   };
 
   return (
     <main className="min-h-screen w-full bg-white">
-      {/* 상단 좌측 로고 */}
+      {/* 상단 로고 */}
       <header className="w-full">
         <img
           src={Logo}
@@ -71,92 +70,77 @@ export default function Onboarding(): React.JSX.Element {
             />
 
             {/* 본전공 */}
-            <div className="relative">
-              <select
-                value={major?.index ?? ""}
-                onChange={(e) => {
-                  const idx = Number(e.target.value);
-                  const found = MajorOptions.find((m) => m.index === idx) || null;
-                  setMajor(found);
-                }}
-                className={`
-                  appearance-none w-full box-border h-[53px] px-[19px] py-[9px]
-                  rounded-[12px] border-2 border-primary-600 bg-white
-                  font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
-                  focus:outline-none focus:ring-4 focus:ring-primary-600/20
-                  ${major ? "text-gray-700" : "text-gray-400"}
-                `}
-              >
-                <option value="" disabled hidden>
-                  본전공
+            <select
+              value={major ? major.index : ""}
+              onChange={(e) => {
+                const idx = Number(e.target.value);
+                const found = MajorOptions.find((opt) => opt.index === idx);
+                setMajor(found || null);
+              }}
+              required
+              className={`
+                w-full box-border h-[53px] px-[19px] py-[9px]
+                rounded-[12px] border-2 border-primary-600 bg-white
+                font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
+                focus:outline-none focus:ring-4 focus:ring-primary-600/20
+                appearance-none
+                ${major ? "text-gray-700" : "text-gray-400"}
+              `}
+            >
+              <option value="" disabled hidden>
+                본전공
+              </option>
+              {MajorOptions.map((opt) => (
+                <option key={opt.index} value={opt.index}>
+                  {opt.value}
                 </option>
-                {MajorOptions.map((opt) => (
-                  <option key={opt.index} value={opt.index}>
-                    {opt.value}
-                  </option>
-                ))}
-              </select>
-              <BiChevronDown
-                className="pointer-events-none absolute right-[16px] top-1/2 -translate-y-1/2"
-                size={24}
-                color="#5F372F"
-                aria-hidden
-              />
-            </div>
+              ))}
+            </select>
 
-            {/* 이중/부전공 */}
-            <div className="relative">
-              <select
-                value={major2?.index ?? ""}
-                onChange={(e) => {
-                  const idx = Number(e.target.value);
-                  const found = MajorOptions.find((m) => m.index === idx) || null;
-                  setMajor2(found);
-                }}
-                className={`
-                  appearance-none w-full box-border h-[53px] px-[19px] py-[9px]
-                  rounded-[12px] border-2 border-primary-600 bg-white
-                  font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
-                  focus:outline-none focus:ring-4 focus:ring-primary-600/20
-                  ${major2 ? "text-gray-700" : "text-gray-400"}
-                `}
-              >
-                <option value="" disabled hidden>
-                  이중전공 / 부전공
+            {/* 이중전공 / 부전공 */}
+            <select
+              value={major2 ? major2.index : ""}
+              onChange={(e) => {
+                const idx = Number(e.target.value);
+                const found = MajorOptions.find((opt) => opt.index === idx);
+                setMajor2(found || null);
+              }}
+              className={`
+                w-full box-border h-[53px] px-[19px] py-[9px]
+                rounded-[12px] border-2 border-primary-600 bg-white
+                font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
+                focus:outline-none focus:ring-4 focus:ring-primary-600/20
+                appearance-none
+                ${major2 ? "text-gray-700" : "text-gray-400"}
+              `}
+            >
+              <option value="" disabled hidden>
+                이중전공 / 부전공
+              </option>
+              {MajorOptions.map((opt) => (
+                <option key={opt.index} value={opt.index}>
+                  {opt.value}
                 </option>
-                {MajorOptions.map((opt) => (
-                  <option key={opt.index} value={opt.index}>
-                    {opt.value}
-                  </option>
-                ))}
-              </select>
-              <BiChevronDown
-                className="pointer-events-none absolute right-[16px] top-1/2 -translate-y-1/2"
-                size={24}
-                color="#5F372F"
-                aria-hidden
-              />
-            </div>
+              ))}
+            </select>
           </div>
 
-          {/* 버튼 영역 */}
+          {/* 완료 버튼 */}
           <div className="w-full flex justify-center mt-[100px]">
-            <button
-              type="submit"
+            <div
               className="
-                inline-flex items-center justify-center gap-[10px]
-                box-border w-[141px] h-[51px] px-[47.5px] py-[8.5px]
-                rounded-[12px] bg-primary-600 border-2 border-primary-600
-                text-white font-[Pretendard] font-semibold
-                text-[24px] leading-[140%] tracking-[-0.6px]
-                shadow-[0_6px_8px_0_rgba(143,116,110,1)]
-                transition hover:brightness-110 active:translate-y-[1px]
-                focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-600/30
+                w-[141px] h-[51px] flex items-center justify-center
+                [&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:h-full
               "
-              disabled={!email || !name || !major} /* 최소 검증 */
             >
-              완료
-            </button>
+              <Button
+                text="완료"
+                font="title-sm"
+                color={600}
+                isFull
+                onClick={handleSubmit as any}
+              />
+            </div>
           </div>
         </form>
       </section>
