@@ -7,6 +7,7 @@ interface ButtonProps {
   isOutline?: boolean;
   isFull?: boolean;
   onClick?: () => void;
+  className?: string;
 }
 
 export default function Button({
@@ -16,6 +17,7 @@ export default function Button({
   isOutline = false,
   isFull = false,
   onClick,
+  className = "",
 }: ButtonProps): React.JSX.Element {
   const getButtonClasses = () => {
     const isSmallFont: boolean = font === "body-sm";
