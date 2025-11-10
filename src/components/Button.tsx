@@ -7,7 +7,6 @@ interface ButtonProps {
   isOutline?: boolean;
   isFull?: boolean;
   onClick?: () => void;
-  className?: string;
 }
 
 export default function Button({
@@ -17,12 +16,12 @@ export default function Button({
   isOutline = false,
   isFull = false,
   onClick,
-  className = "",
 }: ButtonProps): React.JSX.Element {
   const getButtonClasses = () => {
+    const isTitleFont: boolean = font === "title-md";
     const isSmallFont: boolean = font === "body-sm";
 
-    const baseClasses = `btn ${font} border-2 ${isFull ? "w-full" : isSmallFont ? "w-fit" : "min-w-30"}`;
+    const baseClasses = `${isFull ? "w-full" : isSmallFont ? "w-fit" : "min-w-30"} ${isTitleFont ? "p-5" : "px-5 py-2.5"} btn ${font} border-2`;
     const outlineClasses = `${baseClasses} bg-white hover:bg-gray-100 active:bg-gray-200`;
     const fillClasses = `${baseClasses} text-white`;
 
