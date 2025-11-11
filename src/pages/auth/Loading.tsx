@@ -10,10 +10,7 @@ export default function Loading(): React.JSX.Element {
     const checkOnboarding = async () => {
       try {
         const userData = await getUser();
-        console.log("userData:", userData);
-
-        // const isOnboarding = userData.isOnboarding;
-        const isOnboarding = false;
+        const isOnboarding = userData.onboarding;
 
         if (isOnboarding) {
           navigate("/main", { replace: true });

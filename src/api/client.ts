@@ -19,8 +19,8 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // 401 Unauthenticated 에러 처리
     if (error.response && error.response.status === 401) {
-      // 401 Unauthenticated 에러 처리
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
