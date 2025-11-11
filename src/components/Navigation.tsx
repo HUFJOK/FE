@@ -1,7 +1,8 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import Button from "./Button";
+import { logout } from "../api/users";
 
 const menuItems = [
   { name: "MAIN", path: "/main" },
@@ -10,12 +11,19 @@ const menuItems = [
 ];
 
 export default function Navigation(): React.JSX.Element {
+  const navigate = useNavigate();
   const location = useLocation();
 
   const point = 500;
 
-  const logout = (): void => {
-    console.log("로그아웃");
+  const handleLogout = async (): Promise<void> => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("로그아웃에 실패했습니다:", error);
+      alert("로그아웃 중 오류가 발생했습니다. 다시 시도해 주세요.");
+    }
   };
 
   return (
@@ -47,7 +55,7 @@ export default function Navigation(): React.JSX.Element {
 
       <div className="flex items-center gap-6">
         <div className="title-sm text-primary-600">{point}P</div>
-        <Button text="로그아웃" font="body-lg" onClick={logout} />
+        <Button text="로그아웃" font="body-lg" onClick={handleLogout} />
       </div>
     </div>
   );
