@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Setting from "./pages/Setting";
 import Login from "./pages/auth/Login";
+import Loading from "./pages/auth/Loading";
 import Onboarding from "./pages/auth/Onboarding";
 import Main from "./pages/Main";
 import Data from "./pages/data/Data";
@@ -25,6 +26,7 @@ export default function AppRouter(): React.JSX.Element {
       <Routes>
         <Route path="/" element={<Setting />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/loading" element={<Loading />} />
         <Route path="/onboarding" element={<Onboarding />} />
 
         <Route element={<NavigationLayout />}>

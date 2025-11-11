@@ -12,6 +12,7 @@ export default function Setting(): React.JSX.Element {
     { path: "/data/upload", name: "⬆️ 자료 업로드 페이지" },
     { path: "/data/1", name: "📄 자료 상세 페이지 (ID: 1)" },
     { path: "/mypage", name: "👤 마이 페이지" },
+    { path: "/loading", name: "🔄 로딩 페이지" },
   ];
 
   return (
