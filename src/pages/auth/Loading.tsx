@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../api/users";
-import { isAxiosError } from "axios"
+import { isAxiosError } from "axios";
 
 export default function Loading(): React.JSX.Element {
   const navigate = useNavigate();
