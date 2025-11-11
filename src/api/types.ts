@@ -3,5 +3,5 @@ export interface UserResponse {
   major: string;
   minor: string | null;
   email: string;
-  // isOnboarding: boolean;
+  onboarding: boolean;
 }
