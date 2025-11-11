@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BiSearch, BiChevronDown, BiChevronUp, BiX } from "react-icons/bi";
+import { BiSearch, BiX } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
@@ -21,13 +21,70 @@ type DocItem = {
 };
 
 const sample: DocItem[] = [
-  { id: 1, title: "2025-1 기계학습 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 125, reviews: 10, price: 200 },
-  { id: 2, title: "2025-1 알고리즘 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 122, reviews: 15, price: 300 },
-  { id: 3, title: "2025-1 알고리즘 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 127, reviews: 20, price: 250 },
-  { id: 4, title: "2025-1 기계학습 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 126, reviews: 25, price: 180 },
+  {
+    id: 1,
+    title: "2025-1 기계학습 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 125,
+    reviews: 10,
+    price: 200,
+  },
+  {
+    id: 2,
+    title: "2025-1 알고리즘 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 122,
+    reviews: 15,
+    price: 300,
+  },
+  {
+    id: 3,
+    title: "2025-1 알고리즘 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 127,
+    reviews: 20,
+    price: 250,
+  },
+  {
+    id: 4,
+    title: "2025-1 기계학습 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 126,
+    reviews: 25,
+    price: 180,
+  },
 ];
 
-const SEMESTER_OPTIONS = ["25-2", "25-1", "24-2", "24-1", "23-2", "23-1", "22-2", "22-1", "21-2", "21-1", "20-2", "20-1"];
+const SEMESTER_OPTIONS = [
+  "25-2",
+  "25-1",
+  "24-2",
+  "24-1",
+  "23-2",
+  "23-1",
+  "22-2",
+  "22-1",
+  "21-2",
+  "21-1",
+  "20-2",
+  "20-1",
+];
 const GRADE_OPTIONS = ["1학년", "2학년", "3학년", "4학년"];
 
 /** 공통 칩 */
@@ -86,7 +143,9 @@ export default function MainContent(): React.JSX.Element {
   const [q, setQ] = useState("");
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [sortLabel, setSortLabel] = useState<"추천순" | "다운로드순" | "최신순">("추천순");
+  const [sortLabel, setSortLabel] = useState<
+    "추천순" | "다운로드순" | "최신순"
+  >("추천순");
 
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
@@ -134,17 +193,19 @@ export default function MainContent(): React.JSX.Element {
             rounded-[8px] border-2 bg-gray-100 border-primary-600
           "
         >
-        <div 
-          className="[&_input]:bg-gray-100 [&_input]:border-none
-        [&_input]:outline-none">
-          <Input
-            id="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="검색어를 입력해 주세요."
-            font="body-md"
-          />
-        </div>
+          <div
+            className="[&_input]:bg-gray-100 [&_input]:border-none
+        [&_input]:outline-none"
+          >
+            <Input
+              type="text"
+              id="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="검색어를 입력해 주세요."
+              font="body-md"
+            />
+          </div>
           <BiSearch size={23} color="#5F372F" className="ml-[12px] shrink-0" />
         </div>
       </div>
@@ -159,7 +220,13 @@ export default function MainContent(): React.JSX.Element {
             [&>div]:flex [&>div]:items-center [&>div]:justify-center
           "
         >
-          <Button text="필터링" font="body-sm" color={500} onClick={() => setFilterOpen(true)} isFull/>
+          <Button
+            text="필터링"
+            font="body-sm"
+            color={500}
+            onClick={() => setFilterOpen(true)}
+            isFull
+          />
         </div>
         <Chip>{selectedSemester ?? "학기"}</Chip>
         <Chip>{selectedGrade ?? "학년"}</Chip>
@@ -200,14 +267,26 @@ export default function MainContent(): React.JSX.Element {
       {/* 문서 리스트 */}
       <div className="flex flex-col gap-[16px]">
         {filteredSorted.map((item) => (
-          <DocCard key={item.id} item={item} onClick={() => navigate("/data/detail")} />
+          <DocCard
+            key={item.id}
+            item={item}
+            onClick={() => navigate("/data/detail")}
+          />
         ))}
       </div>
 
       {/* ===== 필터 팝업 ===== */}
       {filterOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-          <button className="absolute inset-0 bg-black/30" onClick={() => setFilterOpen(false)} aria-label="닫기 배경" />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setFilterOpen(false)}
+            aria-label="닫기 배경"
+          />
           <div
             className="
               relative w-[400px] h-[500px]
@@ -215,13 +294,20 @@ export default function MainContent(): React.JSX.Element {
               p-[25px] shadow-md flex flex-col gap-[15px]
             "
           >
-            <button type="button" className="absolute right-[16px] top-[12px] p-1" onClick={() => setFilterOpen(false)} aria-label="닫기">
+            <button
+              type="button"
+              className="absolute right-[16px] top-[12px] p-1"
+              onClick={() => setFilterOpen(false)}
+              aria-label="닫기"
+            >
               <BiX size={24} color="#5F372F" />
             </button>
 
             {/* 학기 */}
             <div className="flex flex-col gap-[3px]">
-              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">학기</div>
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">
+                학기
+              </div>
               <div className="flex flex-wrap gap-[10px]">
                 {SEMESTER_OPTIONS.map((v) => {
                   const active = selectedSemester === v;
@@ -251,7 +337,9 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 학년 */}
             <div className="flex flex-col gap-[3px]">
-              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">학년</div>
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">
+                학년
+              </div>
               <div className="flex flex-wrap gap-[10px]">
                 {GRADE_OPTIONS.map((v) => {
                   const active = selectedGrade === v;
@@ -281,7 +369,9 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 전공 */}
             <div className="flex flex-col gap-[3px]">
-              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">전공</div>
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">
+                전공
+              </div>
               <div
                 className="
                   [&_select]:!bg-[#F6F1ED] [&_select]:border [&_select]:border-primary-600
@@ -300,7 +390,9 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 교수님 */}
             <div className="flex flex-col gap-[3px]">
-              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">교수님</div>
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">
+                교수님
+              </div>
               <div
                 className="
                   [&>input]:!bg-transparent [&>input]:border [&>input]:border-primary-600
@@ -308,6 +400,7 @@ export default function MainContent(): React.JSX.Element {
                 "
               >
                 <Input
+                  type="text"
                   id="professor"
                   value={selectProfessor}
                   onChange={(e) => setProfessor(e.target.value)}
@@ -319,7 +412,9 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 구분 */}
             <div className="flex flex-col gap-[3px]">
-              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">구분</div>
+              <div className="font-[Pretendard] text-[16px] font-semibold text-[#3b3b3b]">
+                구분
+              </div>
               <div className="flex flex-wrap gap-[10px]">
                 {["전공", "교양", "기초"].map((v) => {
                   const active = selectedCategory === v;
@@ -350,9 +445,6 @@ export default function MainContent(): React.JSX.Element {
         </div>
       )}
       {/* ===== /필터 팝업 ===== */}
-
-
-
     </section>
   );
 }

@@ -17,16 +17,93 @@ type Item = {
 
 /** 샘플 데이터 */
 const purchasedSeed: Item[] = [
-  { id: 1, title: "2025-1 컴퓨팅 사고 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 120, reviews: 10, price: 200 },
-  { id: 2, title: "2025-1 컴퓨팅 사고 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 120, reviews: 10, price: 300 },
-  { id: 3, title: "2025-1 컴퓨팅 사고 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 120, reviews: 10, price: 250 },
-  { id: 4, title: "2025-1 컴퓨팅 사고 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 120, reviews: 10, price: 180 },
-  { id: 5, title: "2025-1 컴퓨팅 사고 중간고사 족보", semester: "2025-2", grade: "3학년", major: "컴퓨터공학부", professor: "김외대 교수님", type: "전공", downloads: 120, reviews: 10, price: 190 },
+  {
+    id: 1,
+    title: "2025-1 컴퓨팅 사고 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 120,
+    reviews: 10,
+    price: 200,
+  },
+  {
+    id: 2,
+    title: "2025-1 컴퓨팅 사고 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 120,
+    reviews: 10,
+    price: 300,
+  },
+  {
+    id: 3,
+    title: "2025-1 컴퓨팅 사고 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 120,
+    reviews: 10,
+    price: 250,
+  },
+  {
+    id: 4,
+    title: "2025-1 컴퓨팅 사고 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 120,
+    reviews: 10,
+    price: 180,
+  },
+  {
+    id: 5,
+    title: "2025-1 컴퓨팅 사고 중간고사 족보",
+    semester: "2025-2",
+    grade: "3학년",
+    major: "컴퓨터공학부",
+    professor: "김외대 교수님",
+    type: "전공",
+    downloads: 120,
+    reviews: 10,
+    price: 190,
+  },
 ];
 
 const soldSeed: Item[] = [
-  { id: 101, title: "2024-2 자료구조 기말 족보", semester: "2024-2", grade: "2학년", major: "컴퓨터공학부", professor: "홍길동 교수님", type: "전공", downloads: 98, reviews: 5, price: 200 },
-  { id: 102, title: "2024-1 이산수학 중간 족보", semester: "2024-1", grade: "1학년", major: "컴퓨터공학부", professor: "아무개 교수님", type: "전공", downloads: 76, reviews: 3, price: 200 },
+  {
+    id: 101,
+    title: "2024-2 자료구조 기말 족보",
+    semester: "2024-2",
+    grade: "2학년",
+    major: "컴퓨터공학부",
+    professor: "홍길동 교수님",
+    type: "전공",
+    downloads: 98,
+    reviews: 5,
+    price: 200,
+  },
+  {
+    id: 102,
+    title: "2024-1 이산수학 중간 족보",
+    semester: "2024-1",
+    grade: "1학년",
+    major: "컴퓨터공학부",
+    professor: "아무개 교수님",
+    type: "전공",
+    downloads: 76,
+    reviews: 3,
+    price: 200,
+  },
 ];
 
 /** 좌측 카테고리 버튼 */
@@ -113,9 +190,7 @@ function DocRow({
       <div className="flex items-start pr-[20px]">
         <div className="flex-1 min-w-0">
           {/* 제목 */}
-          <h3 className="title-sm mb-[10px]">
-            {item.title}
-          </h3>
+          <h3 className="title-sm mb-[10px]">{item.title}</h3>
 
           {/* 구매 탭 */}
           {displayMode === "buy" && (
@@ -128,7 +203,8 @@ function DocRow({
           {/* 판매 탭 */}
           {displayMode === "sell" && (
             <p className="body-sm">
-              다운로드 {item.downloads}회 &nbsp; 리뷰 {item.reviews}개 &nbsp; 가격 {item.price}P
+              다운로드 {item.downloads}회 &nbsp; 리뷰 {item.reviews}개 &nbsp;
+              가격 {item.price}P
             </p>
           )}
         </div>
@@ -159,14 +235,14 @@ export default function MyDataFixedLayout(): React.JSX.Element {
 
   const list = useMemo(
     () => (tab === "buy" ? purchased : sold),
-    [tab, purchased, sold]
+    [tab, purchased, sold],
   );
 
-  const openDetail = (id: number) => navigate("/data/detail");
-  const handleEdit = (id: number) => navigate("/data/upload");
+  const openDetail = (id: number) => navigate(`/data/${id}`);
+  const handleEdit = (id: number) =>
+    navigate("/data/upload", { state: { id } });
   const handleDelete = (id: number) => {
-    if (tab === "buy")
-      setPurchased((prev) => prev.filter((v) => v.id !== id));
+    if (tab === "buy") setPurchased((prev) => prev.filter((v) => v.id !== id));
     else setSold((prev) => prev.filter((v) => v.id !== id));
   };
 
