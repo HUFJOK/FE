@@ -6,7 +6,8 @@ import Dropdown from "../components/Dropdown";
 import PointDropdown from "../components/MyPage/PointDropdown";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
-import { getPointHistory, getPoint, getUser, updateUser } from "../api/users";
+import { getPointHistory, getUser, updateUser } from "../api/users";
+import { usePointStore } from "../store/pointStore";
 import type { PointResponse, UserUpdateRequest } from "../api/types";
 
 interface HistoryItem {
@@ -22,21 +23,21 @@ export default function MyPage(): React.JSX.Element {
   const [nicknameInput, setNicknameInput] = useState<string>("");
   const [majorOption, setMajorOption] = useState<Option | null>(null);
   const [minorOption, setMinorOption] = useState<Option | null>(null);
-  const [point, setPoint] = useState<number>(0);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { point, isPointLoading } = usePointStore();
+
   useEffect(() => {
-    const fetchMyPageData = async () => {
+    const fetchMyPage = async () => {
       try {
-        setIsLoading(true);
+        setIsPageLoading(true);
         setError(null);
 
-        const [userData, pointsData, historyData] = await Promise.all([
+        const [userData, historyData] = await Promise.all([
           getUser(),
-          getPoint(),
           getPointHistory(),
         ]);
 
@@ -56,8 +57,6 @@ export default function MyPage(): React.JSX.Element {
         }
         setMinorOption(minor);
 
-        setPoint(pointsData.amount);
-
         const formattedHistory: HistoryItem[] = historyData.map(
           (item: PointResponse, index: number) => ({
             id: index,
@@ -71,11 +70,11 @@ export default function MyPage(): React.JSX.Element {
         console.error("데이터 로딩 실패:", err);
         setError("데이터를 불러오는 중 오류가 발생했습니다.");
       } finally {
-        setIsLoading(false);
+        setIsPageLoading(false);
       }
     };
 
-    fetchMyPageData();
+    fetchMyPage();
   }, []);
 
   const handleEdit = async (): Promise<void> => {
@@ -109,6 +108,8 @@ export default function MyPage(): React.JSX.Element {
       setIsEdit(true);
     }
   };
+
+  const isLoading = isPageLoading || isPointLoading;
 
   if (isLoading) {
     return (
