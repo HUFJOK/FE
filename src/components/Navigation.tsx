@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import Button from "./Button";
+import { usePointStore } from "../store/pointStore";
 import { logout } from "../api/users";
 
 const menuItems = [
@@ -13,8 +14,11 @@ const menuItems = [
 export default function Navigation(): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
+  const { point, fetchPoint } = usePointStore();
 
-  const point = 500;
+  useEffect(() => {
+    fetchPoint();
+  }, [fetchPoint]);
 
   const handleLogout = async (): Promise<void> => {
     try {

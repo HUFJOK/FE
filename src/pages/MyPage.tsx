@@ -6,7 +6,7 @@ import Dropdown from "../components/Dropdown";
 import PointDropdown from "../components/MyPage/PointDropdown";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
-import { getPointHistory, getPoints, getUser, updateUser } from "../api/users";
+import { getPointHistory, getPoint, getUser, updateUser } from "../api/users";
 import type { PointResponse, UserUpdateRequest } from "../api/types";
 
 interface HistoryItem {
@@ -36,7 +36,7 @@ export default function MyPage(): React.JSX.Element {
 
         const [userData, pointsData, historyData] = await Promise.all([
           getUser(),
-          getPoints(),
+          getPoint(),
           getPointHistory(),
         ]);
 
@@ -146,7 +146,7 @@ export default function MyPage(): React.JSX.Element {
             disabled={true}
           />
         </LabelField>
-        <LabelField label="이름">
+        <LabelField label="닉네임">
           <Input
             type="text"
             id="nickname"
