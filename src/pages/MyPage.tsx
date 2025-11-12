@@ -86,11 +86,10 @@ export default function MyPage(): React.JSX.Element {
 
       setIsSaving(true);
       try {
-        const isMinorNone = !minorOption || minorOption.value === "없음";
         const updateData: UserUpdateRequest = {
           nickname: nicknameInput,
           major: majorOption.value,
-          minor: isMinorNone ? null : minorOption?.value || null,
+          minor: !minorOption ? "없음" : minorOption.value,
         };
 
         const updatedUserData = await updateUser(updateData);

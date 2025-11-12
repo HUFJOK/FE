@@ -17,7 +17,7 @@ export interface UserResponse {
 export interface UserUpdateRequest {
   nickname: string;
   major: string;
-  minor: string | null;
+  minor: string;
 }
 
 export interface OnboardingRequest {
@@ -81,17 +81,20 @@ export interface AttachmentDto {
 export interface MaterialGetResponse {
   materialId: number;
   title: string;
-  description: string;
-  professorName: string;
-  courseName: string;
   year: number;
   semester: number;
+  professorName: string;
+  grade: string;
+  courseDivision: string;
+  courseName: string;
+  description: string;
   authorName: string;
   authorId: number;
   createdAt: string;
   updatedAt: string;
-  avgRating: number | null;
+  avgRating: number;
   reviewCount: number;
+  downloadCount: number;
   attachments: AttachmentDto[];
 }
 
@@ -109,20 +112,24 @@ export interface MaterialRequest {
 export interface MaterialUpdateResponse {
   id: number;
   title: string;
-  description: string;
-  professorName: string;
-  courseName: string;
   year: number;
   semester: number;
-  courseDivision: string;
+  professorName: string;
   grade: string;
+  courseDivision: string;
+  courseName: string;
+  description: string;
   updatedAt: string;
 }
 
 export interface MaterialSummary {
   id: number;
   title: string;
+  year: number;
+  semester: number;
   professorName: string;
+  grade: string;
+  courseDivision: string;
 }
 
 export interface MaterialListResponse {
