@@ -5,7 +5,6 @@ import type {
   MaterialGetResponse,
   MaterialListResponse,
   MaterialRequest,
-  MaterialUpdateRequest,
   MaterialUpdateResponse,
 } from "./types";
 
@@ -22,7 +21,7 @@ export const getMaterial = async (
 // 자료 수정 (수정 필요)
 export const updateMaterial = async (
   materialId: number,
-  data: MaterialUpdateRequest,
+  data: MaterialRequest,
 ): Promise<MaterialUpdateResponse> => {
   const response = await apiClient.put<MaterialUpdateResponse>(
     `/api/v1/materials/${materialId}`,
