@@ -42,7 +42,7 @@ export const setOnboarding = async (
 
 /** 사용자 포인트 관련 API */
 // 포인트 사용
-export const usePoints = async (data: PointRequest): Promise<PointResponse> => {
+export const usePoint = async (data: PointRequest): Promise<PointResponse> => {
   const response = await apiClient.post<PointResponse>(
     "/api/v1/users/mypage/points/use",
     data,
@@ -53,9 +53,7 @@ export const usePoints = async (data: PointRequest): Promise<PointResponse> => {
 };
 
 // 포인트 적립
-export const earnPoints = async (
-  data: PointRequest,
-): Promise<PointResponse> => {
+export const earnPoint = async (data: PointRequest): Promise<PointResponse> => {
   const response = await apiClient.post<PointResponse>(
     "/api/v1/users/mypage/points/earn",
     data,
@@ -79,7 +77,7 @@ export const getPointHistory = async (): Promise<PointHistoryResponse> => {
 };
 
 // 내 포인트 잔액
-export const getPoints = async (): Promise<PointResponse> => {
+export const getPoint = async (): Promise<PointResponse> => {
   const response = await apiClient.get<PointResponse>(
     "/api/v1/users/mypage/points/amount",
   );
