@@ -33,6 +33,7 @@ export default function AppRouter(): React.JSX.Element {
           <Route path="/main" element={<Main />} />
           <Route path="/data" element={<Data />} />
           <Route path="/data/upload" element={<DataUpload />} />
+          <Route path="/data/edit/:id" element={<DataUpload />} />
           <Route path="/data/:id" element={<DataDetail />} />
           <Route path="/mypage" element={<MyPage />} />
         </Route>
