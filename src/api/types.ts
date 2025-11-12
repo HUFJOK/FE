@@ -106,12 +106,6 @@ export interface MaterialRequest {
   description: string;
 }
 
-// 자료 수정 API 수정 시 삭제
-export interface MaterialUpdateRequest {
-  title: string;
-  description: string;
-}
-
 export interface MaterialUpdateResponse {
   id: number;
   title: string;
@@ -120,6 +114,8 @@ export interface MaterialUpdateResponse {
   courseName: string;
   year: number;
   semester: number;
+  courseDivision: string;
+  grade: string;
   updatedAt: string;
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BiSearch, BiX } from "react-icons/bi";
+import { BiX } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
