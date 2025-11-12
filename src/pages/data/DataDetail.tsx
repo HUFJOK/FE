@@ -50,7 +50,7 @@ export default function DataDetail(): React.JSX.Element {
 
   const handlePurchase = (): void => {
     setIsPurchased(true);
-    if(isPurchased) {
+    if (isPurchased) {
       console.log("파일 다운로드");
     } else {
       console.log("파일 구매 완료");

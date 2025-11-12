@@ -1,21 +1,49 @@
+// src/pages/auth/Onboarding.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
 import { MajorOptions } from "../../data/OptionData";
 import type { Option } from "../../data/OptionData";
 import Button from "../../components/Button";
+import { setOnboarding } from "../../api/users";
 
 export default function Onboarding(): React.JSX.Element {
   const navigate = useNavigate();
 
+  // UI 유지용 입력값들 (서버로는 전송하지 않음)
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [major, setMajor] = useState<Option | null>(null);
-  const [major2, setMajor2] = useState<Option | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 실제 서버 연동 대상
+  const [major, setMajor] = useState<Option | null>(null);
+  const [minor, setMinor] = useState<Option | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/main");
+
+    if (!major) {
+      alert("본전공을 선택해 주세요.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 서버로 전송되는 major, minor
+      await setOnboarding({
+        major: major.value,
+        minor: minor?.value ?? "",
+      });
+
+      // 완료 후 메인 페이지로 이동
+      navigate("/main", { replace: true });
+    } catch (err) {
+      console.error("온보딩 저장 실패:", err);
+      alert("온보딩 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,7 +74,7 @@ export default function Onboarding(): React.JSX.Element {
               className="
                 w-full box-border h-[53px] px-[19px] py-[9px]
                 rounded-[12px] border-2 border-primary-600
-                font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
+                title-sm
                 text-gray-700 placeholder-gray-400
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
               "
@@ -63,7 +91,7 @@ export default function Onboarding(): React.JSX.Element {
               className="
                 w-full box-border h-[53px] px-[19px] py-[9px]
                 rounded-[12px] border-2 border-primary-600
-                font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
+                title-sm
                 text-gray-700 placeholder-gray-400
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
               "
@@ -71,17 +99,18 @@ export default function Onboarding(): React.JSX.Element {
 
             {/* 본전공 */}
             <select
-              value={major ? major.index : ""}
+              value={major ? major.value : ""}
               onChange={(e) => {
-                const idx = Number(e.target.value);
-                const found = MajorOptions.find((opt) => opt.index === idx);
-                setMajor(found || null);
+                const val = e.target.value;
+                const found =
+                  MajorOptions.find((opt) => opt.value === val) || null;
+                setMajor(found);
               }}
               required
               className={`
                 w-full box-border h-[53px] px-[19px] py-[9px]
                 rounded-[12px] border-2 border-primary-600 bg-white
-                font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
+                title-sm
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
                 appearance-none
                 ${major ? "text-gray-700" : "text-gray-400"}
@@ -91,34 +120,35 @@ export default function Onboarding(): React.JSX.Element {
                 본전공
               </option>
               {MajorOptions.map((opt) => (
-                <option key={opt.index} value={opt.index}>
+                <option key={opt.index} value={opt.value}>
                   {opt.value}
                 </option>
               ))}
             </select>
 
-            {/* 이중전공 / 부전공 */}
+            {/* 이중전공 부전공 */}
             <select
-              value={major2 ? major2.index : ""}
+              value={minor ? minor.value : ""}
               onChange={(e) => {
-                const idx = Number(e.target.value);
-                const found = MajorOptions.find((opt) => opt.index === idx);
-                setMajor2(found || null);
+                const val = e.target.value;
+                const found =
+                  MajorOptions.find((opt) => opt.value === val) || null;
+                setMinor(found);
               }}
               className={`
                 w-full box-border h-[53px] px-[19px] py-[9px]
                 rounded-[12px] border-2 border-primary-600 bg-white
-                font-[Pretendard] font-semibold text-[24px] leading-[140%] tracking-[-0.6px]
+                title-sm
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
                 appearance-none
-                ${major2 ? "text-gray-700" : "text-gray-400"}
+                ${minor ? "text-gray-700" : "text-gray-400"}
               `}
             >
               <option value="" disabled hidden>
                 이중전공 / 부전공
               </option>
               {MajorOptions.map((opt) => (
-                <option key={opt.index} value={opt.index}>
+                <option key={opt.index} value={opt.value}>
                   {opt.value}
                 </option>
               ))}
@@ -127,20 +157,20 @@ export default function Onboarding(): React.JSX.Element {
 
           {/* 완료 버튼 */}
           <div className="w-full flex justify-center mt-[100px]">
-            <div
-              className="
-                w-[141px] h-[51px] flex items-center justify-center
-                [&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:h-full
-              "
+            <button
+              type="submit"
+              className="w-[141px] h-[51px]"
+              disabled={loading}
             >
-              <Button
-                text="완료"
-                font="title-sm"
-                color={600}
-                isFull
-                onClick={handleSubmit as any}
-              />
-            </div>
+              <div className="[&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:h-full">
+                <Button
+                  text={loading ? "저장 중..." : "완료"}
+                  font="title-sm"
+                  color={600}
+                  isFull
+                />
+              </div>
+            </button>
           </div>
         </form>
       </section>
