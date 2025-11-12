@@ -6,6 +6,8 @@ import Dropdown from "../components/Dropdown";
 import PointDropdown from "../components/MyPage/PointDropdown";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
+import { getPointHistory, getPoints, getUser, updateUser } from "../api/users";
+import type { PointResponse, UserUpdateRequest } from "../api/types";
 
 interface HistoryItem {
   id: number;
@@ -14,38 +16,115 @@ interface HistoryItem {
   amount: number;
 }
 
-// 임시 데이터
-const sampleHistory: HistoryItem[] = [
-  { id: 1, description: "족보 구매", date: "2025.10.01 00:00", amount: -200 },
-  { id: 2, description: "족보 업로드", date: "2025.10.01 00:00", amount: 200 },
-  { id: 3, description: "족보 구매", date: "2025.10.01 00:00", amount: -100 },
-  { id: 4, description: "족보 구매", date: "2025.10.01 00:00", amount: -100 },
-];
-
 export default function MyPage(): React.JSX.Element {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [emailInput, setEmailInput] = useState<string>("");
-  const [nameInput, setNameInput] = useState<string>("");
+  const [nicknameInput, setNicknameInput] = useState<string>("");
   const [majorOption, setMajorOption] = useState<Option | null>(null);
   const [minorOption, setMinorOption] = useState<Option | null>(null);
   const [point, setPoint] = useState<number>(0);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setEmailInput("202500000@hufs.ac.kr");
-    setNameInput("홍길동");
-    setMajorOption(MajorOptions[0]);
-    setMinorOption(MajorOptions[MajorOptions.length - 1]);
-    setPoint(500);
-    setHistory(sampleHistory);
+    const fetchMyPageData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const [userData, pointsData, historyData] = await Promise.all([
+          getUser(),
+          getPoints(),
+          getPointHistory(),
+        ]);
+
+        setEmailInput(userData.email);
+        setNicknameInput(userData.nickname);
+
+        const major =
+          MajorOptions.find((opt) => opt.value === userData.major) || null;
+        setMajorOption(major);
+
+        let minor: Option | null;
+        if (userData.minor === null) {
+          minor = MajorOptions.find((opt) => opt.value === "없음") || null;
+        } else {
+          minor =
+            MajorOptions.find((opt) => opt.value === userData.minor) || null;
+        }
+        setMinorOption(minor);
+
+        setPoint(pointsData.amount);
+
+        const formattedHistory: HistoryItem[] = historyData.map(
+          (item: PointResponse, index: number) => ({
+            id: index,
+            description: item.reason,
+            date: item.createdAt,
+            amount: item.amount,
+          }),
+        );
+        setHistory(formattedHistory);
+      } catch (err) {
+        console.error("데이터 로딩 실패:", err);
+        setError("데이터를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMyPageData();
   }, []);
 
-  const handleEdit = (): void => {
+  const handleEdit = async (): Promise<void> => {
     if (isEdit) {
-      console.log("저장하기");
+      if (!majorOption) {
+        alert("본전공을 선택해주세요.");
+        return;
+      }
+
+      setIsSaving(true);
+      try {
+        const isMinorNone = !minorOption || minorOption.value === "없음";
+        const updateData: UserUpdateRequest = {
+          nickname: nicknameInput,
+          major: majorOption.value,
+          minor: isMinorNone ? null : minorOption?.value || null,
+        };
+
+        const updatedUserData = await updateUser(updateData);
+        setNicknameInput(updatedUserData.nickname);
+
+        alert("정보가 성공적으로 저장되었습니다.");
+        setIsEdit(false);
+      } catch (err) {
+        console.error("정보 저장 실패:", err);
+        alert("정보 저장 중 오류가 발생했습니다.");
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      setIsEdit(true);
     }
-    setIsEdit((prev) => !prev);
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen w-full flex justify-center items-center title-sm text-primary-600">
+        <div>로딩 중입니다...</div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen w-full flex justify-center items-center title-sm text-red-500">
+        <div>{error}</div>
+      </main>
+    );
+  }
 
   return (
     <div className="max-w-195 py-17.5 mx-auto flex flex-col justify-start items-center gap-7.5">
@@ -70,10 +149,10 @@ export default function MyPage(): React.JSX.Element {
         <LabelField label="이름">
           <Input
             type="text"
-            id="name"
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-            disabled={!isEdit}
+            id="nickname"
+            value={nicknameInput}
+            onChange={(e) => setNicknameInput(e.target.value)}
+            disabled={!isEdit || isSaving}
           />
         </LabelField>
         <LabelField label="본전공">
@@ -81,7 +160,7 @@ export default function MyPage(): React.JSX.Element {
             options={MajorOptions}
             value={majorOption}
             onChange={setMajorOption}
-            disabled={!isEdit}
+            disabled={!isEdit || isSaving}
           />
         </LabelField>
         <LabelField label="이중전공 / 부전공">
@@ -89,7 +168,7 @@ export default function MyPage(): React.JSX.Element {
             options={MajorOptions}
             value={minorOption}
             onChange={setMinorOption}
-            disabled={!isEdit}
+            disabled={!isEdit || isSaving}
           />
         </LabelField>
         <LabelField label="포인트">
