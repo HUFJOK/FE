@@ -5,12 +5,15 @@ import type {
   ReviewResponse,
   ReviewUpdateRequest,
 } from "./types";
+import { formatDateTime } from "./utils";
 
 // 리뷰 단건 조희
 export const getReview = async (reviewId: number): Promise<ReviewResponse> => {
   const response = await apiClient.get<ReviewResponse>(
     `/api/v1/reviews/${reviewId}`,
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
   return response.data;
 };
 
@@ -35,6 +38,8 @@ export const createReview = async (
     "/api/v1/reviews",
     data,
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
   return response.data;
 };
 
@@ -45,5 +50,10 @@ export const getReviews = async (
   const response = await apiClient.get<ReviewResponse[]>(
     `/api/v1/materials/${materialId}/reviews`,
   );
-  return response.data;
+
+  const formattedData = response.data.map((review) => ({
+    ...review,
+    createdAt: formatDateTime(review.createdAt),
+  }));
+  return formattedData;
 };
