@@ -9,6 +9,7 @@ import type {
   UserResponse,
   UserUpdateRequest,
 } from "./types";
+import { formatDateTime } from "./utils";
 
 /** 사용자 정보 관련 API */
 // 기본 정보 조회
@@ -46,6 +47,8 @@ export const usePoints = async (data: PointRequest): Promise<PointResponse> => {
     "/api/v1/users/mypage/points/use",
     data,
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
   return response.data;
 };
 
@@ -57,6 +60,8 @@ export const earnPoints = async (
     "/api/v1/users/mypage/points/earn",
     data,
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
   return response.data;
 };
 
@@ -65,7 +70,12 @@ export const getPointHistory = async (): Promise<PointHistoryResponse> => {
   const response = await apiClient.get<PointHistoryResponse>(
     "/api/v1/users/mypage/points/history",
   );
-  return response.data;
+
+  const formattedData = response.data.map((historyItem) => ({
+    ...historyItem,
+    createdAt: formatDateTime(historyItem.createdAt),
+  }));
+  return formattedData;
 };
 
 // 내 포인트 잔액
@@ -73,6 +83,8 @@ export const getPoints = async (): Promise<PointResponse> => {
   const response = await apiClient.get<PointResponse>(
     "/api/v1/users/mypage/points/amount",
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
   return response.data;
 };
 

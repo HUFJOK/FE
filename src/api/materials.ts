@@ -7,6 +7,7 @@ import type {
   MaterialRequest,
   MaterialUpdateResponse,
 } from "./types";
+import { formatDateTime } from "./utils";
 
 // 특정 자료 상세 조희
 export const getMaterial = async (
@@ -15,6 +16,9 @@ export const getMaterial = async (
   const response = await apiClient.get<MaterialGetResponse>(
     `/api/v1/materials/${materialId}`,
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
+  response.data.updatedAt = formatDateTime(response.data.updatedAt);
   return response.data;
 };
 
@@ -27,6 +31,8 @@ export const updateMaterial = async (
     `/api/v1/materials/${materialId}`,
     data,
   );
+
+  response.data.updatedAt = formatDateTime(response.data.updatedAt);
   return response.data;
 };
 
@@ -77,6 +83,8 @@ export const createMaterial = async (
     "/api/v1/materials",
     formData,
   );
+
+  response.data.createdAt = formatDateTime(response.data.createdAt);
   return response.data;
 };
 
