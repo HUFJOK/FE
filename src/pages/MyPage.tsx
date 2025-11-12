@@ -44,16 +44,14 @@ export default function MyPage(): React.JSX.Element {
         setEmailInput(userData.email);
         setNicknameInput(userData.nickname);
 
-        const major =
-          MajorOptions.find((opt) => opt.value === userData.major) || null;
+        const major = MajorOptions.find((opt) => opt.value === userData.major) || null;
         setMajorOption(major);
 
         let minor: Option | null;
         if (userData.minor === null) {
           minor = MajorOptions.find((opt) => opt.value === "없음") || null;
         } else {
-          minor =
-            MajorOptions.find((opt) => opt.value === userData.minor) || null;
+          minor = MajorOptions.find((opt) => opt.value === userData.minor) || null;
         }
         setMinorOption(minor);
 
@@ -86,10 +84,11 @@ export default function MyPage(): React.JSX.Element {
 
       setIsSaving(true);
       try {
+        const minorValue = minorOption && minorOption.value !== "없음" ? minorOption.value : null;
         const updateData: UserUpdateRequest = {
           nickname: nicknameInput,
           major: majorOption.value,
-          minor: !minorOption ? "없음" : minorOption.value,
+          minor: minorValue,
         };
 
         const updatedUserData = await updateUser(updateData);
@@ -134,6 +133,7 @@ export default function MyPage(): React.JSX.Element {
           text={isEdit ? "저장하기" : "변경하기"}
           font="body-lg"
           onClick={handleEdit}
+          disabled={isSaving}
         />
       </div>
       <div className="w-full flex flex-col justify-start items-center gap-5">

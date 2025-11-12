@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import LabelField from "../../components/LabelField";
@@ -28,10 +28,9 @@ import type {
 
 export default function DataUpload(): React.JSX.Element {
   const navigate = useNavigate();
-  const location = useLocation();
-  const locationState = location.state as { id: number } | undefined;
-  const materialId = locationState?.id;
-  const isEdit = Boolean(materialId);
+  const { id } = useParams<{ id: string }>();
+  const materialId = Number(id);
+  const isEdit = Boolean(id);
   const fetchPoint = usePointStore((state) => state.fetchPoint);
 
   const [title, setTitle] = useState<string>("");
@@ -70,7 +69,7 @@ export default function DataUpload(): React.JSX.Element {
           );
           setGrade(
             GradeOptions.find((opt) => String(opt.value) === data.grade) ||
-              null,
+            null,
           );
           setType(
             TypeOptions.find(
@@ -267,60 +266,64 @@ export default function DataUpload(): React.JSX.Element {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="족보에 대한 설명을 입력하세요"
+          disabled={isLoading}
         />
 
-        {isEdit && attachments.length > 0 ? (
-          <div className="w-full body-sm text-gray-600">
-            <ul className="w-full flex flex-col justify-start items-start gap-2.5">
-              {attachments.map((file) => (
-                <li key={file.id} className="flex justify-start items-center">
-                  {file.originalFileName}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <>
-            <div className="w-full flex flex-col justify-start items-center gap-2.5">
-              <div className="caption text-gray-500">
-                PDF 파일만 업로드 가능
-              </div>
-              <Button
-                text="파일 업로드"
-                font="body-lg"
-                color={500}
-                isFull={true}
-                onClick={handleFileUpload}
-              />
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                multiple // 여러 파일 선택 가능
-                style={{ display: "none" }}
-                accept=".pdf" // 파일 형식 제한
-              />
+        {isEdit ? (
+          attachments.length > 0 ? (
+            <div className="w-full body-sm text-gray-600">
+              <ul className="w-full flex flex-col justify-start items-start gap-2.5">
+                {attachments.map((file) => (
+                  <li key={file.id} className="flex justify-start items-center">
+                    {file.originalFileName}
+                  </li>
+                ))}
+              </ul>
             </div>
-            {files.length > 0 && (
-              <div className="w-full body-sm text-gray-600">
-                <ul className="w-full flex flex-col justify-start items-start gap-2.5">
-                  {files.map((file, index) => (
-                    <li
-                      key={index}
-                      className="flex justify-start items-center gap-2.5"
-                    >
-                      {file.name}
-                      <BiX
-                        className="w-5 h-5 text-primary-500"
-                        onClick={() => handleRemoveFile(file.name)}
-                      />
-                    </li>
-                  ))}
-                </ul>
+          ) : (<></>))
+          : (
+            <>
+              <div className="w-full flex flex-col justify-start items-center gap-2.5">
+                <div className="caption text-gray-500">
+                  PDF 파일만 업로드 가능
+                </div>
+                <Button
+                  text="파일 업로드"
+                  font="body-lg"
+                  color={500}
+                  isFull={true}
+                  onClick={handleFileUpload}
+                  disabled={isLoading}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  multiple // 여러 파일 선택 가능
+                  style={{ display: "none" }}
+                  accept=".pdf" // 파일 형식 제한
+                />
               </div>
-            )}
-          </>
-        )}
+              {files.length > 0 && (
+                <div className="w-full body-sm text-gray-600">
+                  <ul className="w-full flex flex-col justify-start items-start gap-2.5">
+                    {files.map((file, index) => (
+                      <li
+                        key={index}
+                        className="flex justify-start items-center gap-2.5"
+                      >
+                        {file.name}
+                        <BiX
+                          className="w-5 h-5 text-primary-500"
+                          onClick={() => handleRemoveFile(file.name)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
 
         <div className="flex gap-5">
           <Button
@@ -328,13 +331,15 @@ export default function DataUpload(): React.JSX.Element {
             font="body-lg"
             color={500}
             isOutline={true}
-            onClick={() => navigate("/main")}
+            onClick={() => navigate(-1)}
+            disabled={isLoading}
           />
           <Button
             text={isLoading ? "처리 중..." : isEdit ? "수정" : "완료"}
             font="body-lg"
             color={500}
             onClick={handleComplete}
+            disabled={isLoading}
           />
         </div>
       </div>

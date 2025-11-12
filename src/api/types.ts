@@ -17,7 +17,7 @@ export interface UserResponse {
 export interface UserUpdateRequest {
   nickname: string;
   major: string;
-  minor: string;
+  minor: string | null;
 }
 
 export interface OnboardingRequest {
