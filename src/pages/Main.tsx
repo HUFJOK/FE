@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BiX } from "react-icons/bi";
+import { BiSearch, BiX } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import type { Option } from "../data/OptionData";
 import { MajorOptions } from "../data/OptionData";
@@ -7,6 +7,7 @@ import Input from "../components/Input";
 import Dropdown from "../components/Dropdown";
 import Button from "../components/Button";
 import { getMaterials } from "../api/materials";
+import type { MaterialGetResponse } from "../api/types";
 
 /** 년도학기표기 변환  */
 function parseYearSemester(label: string | null) {
@@ -17,15 +18,18 @@ function parseYearSemester(label: string | null) {
   return { year, semester };
 }
 
-/** 서버 응답 */
+/** 카드 정보 리스트 */
 type MaterialVM = {
-  id: number;
+  materialId: number;
   title: string;
+  year: number;
+  semester: number;
+  grade: string;
+  courseDivision: string;
+  courseName: string;
   professorName: string;
-  // 서버가 아직 제공하지 않는 필드는 표시용 기본값
-  downloads?: number;
-  reviews?: number;
-  price?: number;
+  reviewCount: number;
+  downloadCount: number;
 };
 
 const SEMESTER_OPTIONS = [
@@ -42,18 +46,19 @@ const SEMESTER_OPTIONS = [
   "20-2",
   "20-1",
 ];
+
 const GRADE_OPTIONS = ["1학년", "2학년", "3학년", "4학년"];
 
-/** 칩 */
+/** 칩 (필터 바에 쓰는 학기/학년/전공/교수/구분) */
 function Chip({ children }: { children: React.ReactNode }) {
   return (
     <button
       type="button"
       className="
         inline-flex items-center justify-center
-        h-[36px] px-[18px] rounded-[18px] border-1
+        w-[77px] h-[36px] rounded-[20px]
         body-md
-        bg-white text-primary-600 border-primary-600
+        bg-gray-100 text-primary-600 border border-primary-600
       "
     >
       {children}
@@ -63,6 +68,10 @@ function Chip({ children }: { children: React.ReactNode }) {
 
 /** 카드 */
 function DocCard({ item, onClick }: { item: MaterialVM; onClick: () => void }) {
+  const yearSemesterText = `${item.year}-${item.semester}`;
+  const gradeText = item.grade ? `${item.grade}학년` : "";
+  const majorOrCourseText = item.courseName;
+
   return (
     <article
       onClick={onClick}
@@ -74,17 +83,24 @@ function DocCard({ item, onClick }: { item: MaterialVM; onClick: () => void }) {
     >
       <div className="flex items-start">
         <div className="flex-1 min-w-0">
+          {/* 제목 */}
           <h3 className="title-sm text-[#232323] mb-[8px]">{item.title}</h3>
-          <p className="body-sm text-[#5B5B5B]">
-            교수: {item.professorName ?? "-"}
+
+          {/* 하단 정보 */}
+          <p className="body-sm text-[#5B5B5B] flex flex-wrap gap-x-[12px] gap-y-[2px]">
+            <span>{yearSemesterText}</span>
+            <span>{gradeText}</span>
+            <span>{majorOrCourseText}</span>
+            <span>{item.professorName} 교수님</span>
+            <span>{item.courseDivision}</span>
           </p>
         </div>
 
-        {/* 우측 */}
+        {/* 우측: 다운로드 / 리뷰 / 가격 */}
         <div className="ml-[16px] shrink-0 text-right body-sm text-[#5B5B5B]">
-          <div>다운로드 {item.downloads ?? 0}회</div>
-          <div>리뷰 {item.reviews ?? 0}개</div>
-          <div className="text-primary-600 mt-[2px]">{item.price ?? 0}P</div>
+          <div>다운로드 {item.downloadCount ?? 0}회</div>
+          <div>리뷰 {item.reviewCount ?? 0}개</div>
+          <div className="text-primary-600 mt-[2px]">200P</div>
         </div>
       </div>
     </article>
@@ -120,7 +136,7 @@ export default function MainContent(): React.JSX.Element {
     return () => clearTimeout(t);
   }, [q]);
 
-  // 서버 sortBy 매핑 (Swagger에 최신순만 존재)
+  // 서버 sortBy 매핑
   const sortBy = useMemo(
     () => (sortLabel === "최신순" ? "latest" : undefined),
     [sortLabel],
@@ -142,10 +158,19 @@ export default function MainContent(): React.JSX.Element {
           page: 1,
         });
 
-        const next: MaterialVM[] = data.materials.map((m) => ({
-          id: m.id,
+        const list = data as MaterialGetResponse[];
+
+        const next: MaterialVM[] = list.map((m) => ({
+          materialId: m.materialId,
           title: m.title,
+          year: m.year,
+          semester: m.semester,
+          grade: m.grade,
+          courseDivision: m.courseDivision,
+          courseName: m.courseName,
           professorName: m.professorName,
+          reviewCount: m.reviewCount,
+          downloadCount: m.downloadCount,
         }));
 
         setItems(next);
@@ -160,19 +185,18 @@ export default function MainContent(): React.JSX.Element {
     fetch();
   }, [qDebounced, selectedSemester, sortBy]);
 
-  // 서버는 최신순만 지원
+  // 클라이언트 정렬
   const viewList = useMemo(() => {
     const arr = [...items];
     switch (sortLabel) {
       case "추천순":
-        arr.sort((a, b) => (b.reviews ?? 0) - (a.reviews ?? 0));
+        arr.sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0));
         break;
       case "다운로드순":
-        arr.sort((a, b) => (b.downloads ?? 0) - (a.downloads ?? 0));
+        arr.sort((a, b) => (b.downloadCount ?? 0) - (a.downloadCount ?? 0));
         break;
       case "최신순":
       default:
-        // 서버 latest 사용
         break;
     }
     return arr;
@@ -191,9 +215,17 @@ export default function MainContent(): React.JSX.Element {
       </div>
 
       {/* 검색창 */}
-      <div className="flex justify-center mt-[60px] mb-[16px]">
-        <div className="flex justify-between items-center shrink-0 w-[770px] h-[63px] p-[20px] rounded-[8px] border-2 bg-gray-100 border-primary-600">
-          <div className="[&_input]:bg-gray-100 [&_input]:border-none [&_input]:outline-none">
+      <div className="flex justify-center mt-[50px] mb-[20px]">
+        <div
+          className="
+            flex items-center
+            w-full max-w-[770px] h-[63px]
+            px-[24px]
+            rounded-[20px] border-2 border-primary-600
+            bg-[#F4F4F4]
+          "
+        >
+          <div className="flex-1 [&_input]:bg-transparent [&_input]:border-none [&_input]:outline-none [&_input]:shadow-none">
             <Input
               type="text"
               id="search"
@@ -203,20 +235,27 @@ export default function MainContent(): React.JSX.Element {
               font="body-md"
             />
           </div>
+          <BiSearch size={24} className="ml-[12px] text-primary-600" />
         </div>
       </div>
 
-      {/* 필터 + 칩 */}
-      <div className="flex items-center justify-center gap-[10px] mb-[24px]">
-        <div className="w-[77px] h-[36px] rounded-[20px] flex items-center justify-center [&>div]:w-full [&>div]:h-full [&>div]:rounded-[20px] [&>div]:flex [&>div]:items-center [&>div]:justify-center">
-          <Button
-            text="필터링"
-            font="body-sm"
-            color={500}
-            onClick={() => setFilterOpen(true)}
-            isFull
-          />
-        </div>
+      {/* 필터링 + 칩 (상단 바) */}
+      <div className="flex items-center justify-center gap-[12px] mb-[24px]">
+        {/* 필터링 버튼 */}
+        <button
+          type="button"
+          onClick={() => setFilterOpen(true)}
+          className="
+            inline-flex items-center justify-center
+            w-[77px] h-[36px] rounded-[20px]
+            body-md
+            bg-primary-500 text-gray-100
+          "
+        >
+          필터링
+        </button>
+
+        {/* 칩 버튼 */}
         <Chip>{selectedSemester ?? "학기"}</Chip>
         <Chip>{selectedGrade ?? "학년"}</Chip>
         <Chip>{selectedMajor?.value ?? "전공"}</Chip>
@@ -265,139 +304,193 @@ export default function MainContent(): React.JSX.Element {
       <div className="flex flex-col gap-[16px]">
         {viewList.map((item) => (
           <DocCard
-            key={item.id}
+            key={item.materialId}
             item={item}
-            onClick={() => navigate(`/data/detail?id=${item.id}`)}
+            onClick={() => navigate(`/data/${item.materialId}`)}
           />
         ))}
       </div>
 
-      {/* ===== 필터 팝업 ===== */}
-      {filterOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          role="dialog"
-          aria-modal="true"
-        >
-          <button
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setFilterOpen(false)}
-            aria-label="닫기 배경"
-          />
-          <div className="relative w-[400px] h-[500px] rounded-[12px] bg-[#F6F1ED] border-primary-600 p-[25px] shadow-md flex flex-col gap-[15px]">
-            <button
-              type="button"
-              className="absolute right-[16px] top-[12px] p-1"
-              onClick={() => setFilterOpen(false)}
-              aria-label="닫기"
-            >
-              <BiX size={24} color="#5F372F" />
-            </button>
-
-            {/* 학기 필터 */}
-            <div className="flex flex-col gap-[3px]">
-              <div className="body-sm text-[#3b3b3b]">학기</div>
-              <div className="flex flex-wrap gap-[10px]">
-                {SEMESTER_OPTIONS.map((v) => {
-                  const active = selectedSemester === v;
-                  return (
+                {/* ===== 필터 팝업 ===== */}
+                  {filterOpen && (
                     <div
-                      key={v}
-                      className={`h-[28px] [&>div]:h-full [&>div]:px-[12px] [&>div]:rounded-[14px] [&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:border [&>div]:border-primary-600 ${!active ? "[&>div]:!bg-transparent [&>div:hover]:!bg-transparent" : ""}`}
+                      className="fixed inset-0 z-50 flex items-center justify-center"
+                      role="dialog"
+                      aria-modal="true"
                     >
-                      <Button
-                        text={v}
-                        font="body-caption"
-                        color={600}
-                        isOutline={!active}
-                        onClick={() => setSelectedSemester(v)}
+                      {/* 반투명 배경 */}
+                      <button
+                        className="absolute inset-0 bg-black/30"
+                        onClick={() => setFilterOpen(false)}
+                        aria-label="닫기 배경"
                       />
+
+                      {/* 팝업 박스 */}
+                      <div
+                        className="
+                          relative
+                          w-[343px] h-[530px]
+                          rounded-[20px] border-2 border-primary-600
+                          bg-[#F6F1ED]
+                          px-[24px] pt-[45px] pb-[15px]
+                          shadow-md
+                          flex flex-col gap-[24px]
+                        "
+                      >
+                        {/* X 버튼 */}
+                        <button
+                          type="button"
+                          className="absolute right-[24px] top-[24px] p-1"
+                          onClick={() => setFilterOpen(false)}
+                          aria-label="닫기"
+                        >
+                          <BiX size={24} color="#5F372F" />
+                        </button>
+
+                        {/* 학기 */}
+                        <div className="flex flex-col gap-[8px] mt-[4px]">
+                          <div className="body-sm text-[#3b3b3b]">학기</div>
+                          <div className="grid grid-cols-6 gap-[5px]">
+                            {SEMESTER_OPTIONS.map((v) => {
+                              const active = selectedSemester === v;
+                              return (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() => setSelectedSemester(v)}
+                                  className={`
+                                    w-[46px] h-[27px] rounded-[20px]
+                                    border-2 border-primary-600
+                                    body-caption
+                                    flex items-center justify-center
+                                    ${
+                                      active
+                                        ? "bg-primary-600 text-gray-100"
+                                        : "bg-gray-100 text-primary-600"
+                                    }
+                                  `}
+                                >
+                                  {v}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 학년 */}
+                        <div className="flex flex-col gap-[8px]">
+                          <div className="body-sm text-[#3b3b3b]">학년</div>
+                          <div className="grid grid-cols-4">
+                            {GRADE_OPTIONS.map((v) => {
+                              const active = selectedGrade === v;
+                              return (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() => setSelectedGrade(v)}
+                                  className={`
+                                    w-[55px] h-[27px] rounded-[20px]
+                                    border-2 border-primary-600
+                                    body-caption
+                                    flex items-center justify-center
+                                    ${
+                                      active
+                                        ? "bg-primary-600 text-gray-100"
+                                        : "bg-gray-100 text-primary-600"
+                                    }
+                                  `}
+                                >
+                                  {v}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 전공 */}
+                        <div className="flex flex-col gap-[8px]">
+                          <div className="body-sm text-[#3b3b3b]">전공</div>
+                          <div
+                            className="
+                              mt-[3px]
+                              h-[46px]
+                              [&_select]:h-full
+                              [&_select]:w-full
+                              [&_select]:px-[18px]
+                              [&_select]:rounded-[27px]
+                              [&_select]:bg-primary-100 [&_select]:bg-primary-100
+                              [&_select]:border-2 [&_select]:border-primary-600
+                              [&_select]:outline-none [&_select]:ring-0
+                              [&_select]:body-caption
+                            "
+                          >
+                            <Dropdown
+                              options={MajorOptions}
+                              value={selectedMajor}
+                              onChange={(v) => setSelectedMajor(v)}
+                              placeholder="전공"
+                              font="body-caption"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 교수님 */}
+                        <div className="flex flex-col gap-[8px]">
+                          <div className="body-sm text-[#3b3b3b]">교수님</div>
+                          <div
+                            className="
+                              mt-[3px]
+                              h-[46px] flex items-center
+                              rounded-[20px]
+                              bg-primary-100
+                              border-2 border-primary-600
+                            "
+                          >
+                            <Input
+                              type="text"
+                              id="professor"
+                              value={selectProfessor}
+                              onChange={(e) => setProfessor(e.target.value)}
+                              font="body-caption"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 구분 */}
+                        <div className="flex flex-col gap-[8px] mb-[4px]">
+                          <div className="body-sm text-[#3b3b3b]">구분</div>
+                          <div className="flex flex-wrap gap-[10px]">
+                            {["전공", "교양", "기초"].map((v) => {
+                              const active = selectedCategory === v;
+                              return (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() => setSelectedCategory(v)}
+                                  className={`
+                                    w-[55px] h-[27px] rounded-[20px]
+                                    border-2 border-primary-600
+                                    body-caption
+                                    flex items-center justify-center
+                                    ${
+                                      active
+                                        ? "bg-primary-600 text-gray-100"
+                                        : "bg-gray-100 text-primary-600"
+                                    }
+                                  `}
+                                >
+                                  {v}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  )}
+                {/* ===== /필터 팝업 ===== */}
 
-            {/* 학년 */}
-            <div className="flex flex-col gap-[3px]">
-              <div className="body-sm text-[#3b3b3b]">학년</div>
-              <div className="flex flex-wrap gap-[10px]">
-                {GRADE_OPTIONS.map((v) => {
-                  const active = selectedGrade === v;
-                  return (
-                    <div
-                      key={v}
-                      className={`h-[28px] [&>div]:h-full [&>div]:px-[12px] [&>div]:rounded-[14px] [&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:border [&>div]:border-primary-600 ${!active ? "[&>div]:!bg-transparent [&>div:hover]:!bg-transparent" : ""}`}
-                    >
-                      <Button
-                        text={v}
-                        font="body-caption"
-                        color={600}
-                        isOutline={!active}
-                        onClick={() => setSelectedGrade(v)}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            {/* 전공 */}
-            <div className="flex flex-col gap-[3px]">
-              <div className="body-sm text-[#3b3b3b]">전공</div>
-              <div className="[&_select]:!bg-[#F6F1ED] [&_select]:border [&_select]:border-primary-600 [&_select]:!outline-none [&_select]:!ring-0">
-                <Dropdown
-                  options={MajorOptions}
-                  value={selectedMajor}
-                  onChange={(v) => setSelectedMajor(v)}
-                  placeholder="전공"
-                  font="body-caption"
-                />
-              </div>
-            </div>
-
-            {/* 교수님 */}
-            <div className="flex flex-col gap-[3px]">
-              <div className="body-sm text-[#3b3b3b]">교수님</div>
-              <div className="[&>input]:!bg-transparent [&>input]:border [&>input]:border-primary-600 [&>input]:!outline-none [&>input]:!ring-0">
-                <Input
-                  type="text"
-                  id="professor"
-                  value={selectProfessor}
-                  onChange={(e) => setProfessor(e.target.value)}
-                  placeholder="교수님 성함을 입력하세요"
-                  font="body-caption"
-                />
-              </div>
-            </div>
-
-            {/* 구분 */}
-            <div className="flex flex-col gap-[3px]">
-              <div className="body-sm text-[#3b3b3b]">구분</div>
-              <div className="flex flex-wrap gap-[10px]">
-                {["전공", "교양", "기초"].map((v) => {
-                  const active = selectedCategory === v;
-                  return (
-                    <div
-                      key={v}
-                      className={`h-[28px] [&>div]:h-full [&>div]:px-[12px] [&>div]:rounded-[14px] [&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:border [&>div]:border-primary-600 ${!active ? "[&>div]:!bg-transparent [&>div:hover]:!bg-transparent" : ""}`}
-                    >
-                      <Button
-                        text={v}
-                        font="body-caption"
-                        color={600}
-                        isOutline={!active}
-                        onClick={() => setSelectedCategory(v)}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* ===== /필터 팝업 ===== */}
     </section>
   );
 }

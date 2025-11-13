@@ -1,16 +1,16 @@
 // src/pages/auth/Onboarding.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
 import { MajorOptions } from "../../data/OptionData";
 import type { Option } from "../../data/OptionData";
 import Button from "../../components/Button";
-import { setOnboarding } from "../../api/users";
+import { setOnboarding, getUser } from "../../api/users";
 
 export default function Onboarding(): React.JSX.Element {
   const navigate = useNavigate();
 
-  // UI 유지용 입력값들 (서버로는 전송하지 않음)
+  // UI 유지용 입력값
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
@@ -18,6 +18,37 @@ export default function Onboarding(): React.JSX.Element {
   const [major, setMajor] = useState<Option | null>(null);
   const [minor, setMinor] = useState<Option | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 사용자 정보 자동 입력
+  useEffect(() => {
+    const fillUserInfo = async () => {
+      try {
+        const user = await getUser(); // UserResponse 타입
+
+        // 이메일, 닉네임 자동 입력
+        setEmail(user.email ?? "");
+        setName(user.nickname ?? "");
+
+        // 본전공 
+        if (user.major) {
+          const foundMajor =
+            MajorOptions.find((opt) => opt.value === user.major) || null;
+          setMajor(foundMajor);
+        }
+
+        // 이중전공/부전공
+        if (user.minor) {
+          const foundMinor =
+            MajorOptions.find((opt) => opt.value === user.minor) || null;
+          setMinor(foundMinor);
+        }
+      } catch (err) {
+        console.error("온보딩용 사용자 정보 로딩 실패:", err);
+      }
+    };
+
+    fillUserInfo();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +61,7 @@ export default function Onboarding(): React.JSX.Element {
     try {
       setLoading(true);
 
-      // 서버로 전송되는 major, minor
+      // 서버 User 정보 업데이트
       await setOnboarding({
         major: major.value,
         minor: minor?.value ?? "",
@@ -80,12 +111,12 @@ export default function Onboarding(): React.JSX.Element {
               "
             />
 
-            {/* 이름 */}
+            {/* 닉네임 */}
             <input
               type="text"
               autoComplete="name"
               required
-              placeholder="이름"
+              placeholder="닉네임"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="
@@ -126,7 +157,7 @@ export default function Onboarding(): React.JSX.Element {
               ))}
             </select>
 
-            {/* 이중전공 부전공 */}
+            {/* 이중전공 / 부전공 */}
             <select
               value={minor ? minor.value : ""}
               onChange={(e) => {
