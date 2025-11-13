@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { BiSearch, BiX } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import type { Option } from "../data/OptionData";
-import { MajorOptions } from "../data/OptionData";
+import { GradeOptions, MajorOptions } from "../data/OptionData";
 import Input from "../components/Input";
 import Dropdown from "../components/Dropdown";
 import Button from "../components/Button";
 import { getMaterials } from "../api/materials";
-import type { MaterialGetResponse } from "../api/types";
+import type { MaterialListResponse, MaterialSummary } from "../api/types";
 
 /** 년도학기표기 변환  */
 function parseYearSemester(label: string | null) {
@@ -17,20 +17,6 @@ function parseYearSemester(label: string | null) {
   const semester = Number.isFinite(Number(sem)) ? Number(sem) : undefined;
   return { year, semester };
 }
-
-/** 카드 정보 리스트 */
-type MaterialVM = {
-  materialId: number;
-  title: string;
-  year: number;
-  semester: number;
-  grade: string;
-  courseDivision: string;
-  courseName: string;
-  professorName: string;
-  reviewCount: number;
-  downloadCount: number;
-};
 
 const SEMESTER_OPTIONS = [
   "25-2",
@@ -46,8 +32,6 @@ const SEMESTER_OPTIONS = [
   "20-2",
   "20-1",
 ];
-
-const GRADE_OPTIONS = ["1학년", "2학년", "3학년", "4학년"];
 
 /** 칩 (필터 바에 쓰는 학기/학년/전공/교수/구분) */
 function Chip({ children }: { children: React.ReactNode }) {
@@ -67,10 +51,9 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 /** 카드 */
-function DocCard({ item, onClick }: { item: MaterialVM; onClick: () => void }) {
+function DocCard({ item, onClick }: { item: MaterialSummary; onClick: () => void }) {
   const yearSemesterText = `${item.year}-${item.semester}`;
-  const gradeText = item.grade ? `${item.grade}학년` : "";
-  const majorOrCourseText = item.courseName;
+  const majorOrCourseText = item.major;
 
   return (
     <article
@@ -89,7 +72,7 @@ function DocCard({ item, onClick }: { item: MaterialVM; onClick: () => void }) {
           {/* 하단 정보 */}
           <p className="body-sm text-[#5B5B5B] flex flex-wrap gap-x-[12px] gap-y-[2px]">
             <span>{yearSemesterText}</span>
-            <span>{gradeText}</span>
+            <span>{item.grade}</span>
             <span>{majorOrCourseText}</span>
             <span>{item.professorName} 교수님</span>
             <span>{item.courseDivision}</span>
@@ -125,7 +108,7 @@ export default function MainContent(): React.JSX.Element {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // 데이터 상태
-  const [items, setItems] = useState<MaterialVM[]>([]);
+  const [items, setItems] = useState<MaterialSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -158,20 +141,9 @@ export default function MainContent(): React.JSX.Element {
           page: 1,
         });
 
-        const list = data as MaterialGetResponse[];
+        const list = data as MaterialListResponse;
 
-        const next: MaterialVM[] = list.map((m) => ({
-          materialId: m.materialId,
-          title: m.title,
-          year: m.year,
-          semester: m.semester,
-          grade: m.grade,
-          courseDivision: m.courseDivision,
-          courseName: m.courseName,
-          professorName: m.professorName,
-          reviewCount: m.reviewCount,
-          downloadCount: m.downloadCount,
-        }));
+        const next: MaterialSummary[] = list.materials;
 
         setItems(next);
       } catch (e) {
@@ -304,193 +276,184 @@ export default function MainContent(): React.JSX.Element {
       <div className="flex flex-col gap-[16px]">
         {viewList.map((item) => (
           <DocCard
-            key={item.materialId}
+            key={item.id}
             item={item}
-            onClick={() => navigate(`/data/${item.materialId}`)}
+            onClick={() => navigate(`/data/${item.id}`)}
           />
         ))}
       </div>
 
-                {/* ===== 필터 팝업 ===== */}
-                  {filterOpen && (
-                    <div
-                      className="fixed inset-0 z-50 flex items-center justify-center"
-                      role="dialog"
-                      aria-modal="true"
+      {/* ===== 필터 팝업 ===== */}
+      {filterOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* 반투명 배경 */}
+          <button
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setFilterOpen(false)}
+            aria-label="닫기 배경"
+          />
+
+          {/* 팝업 박스 */}
+          <div
+            className="
+              relative
+              w-[343px] h-[530px]
+              rounded-[20px] border-2 border-primary-600 bg-[#F6F1ED]
+              px-[24px] pt-[45px] pb-[15px]
+              shadow-md
+              flex flex-col gap-[24px]
+            "
+          >
+            {/* X 버튼 */}
+            <button
+              type="button"
+              className="absolute right-[24px] top-[24px] p-1"
+              onClick={() => setFilterOpen(false)}
+              aria-label="닫기"
+            >
+              <BiX size={24} color="#5F372F" />
+            </button>
+
+            {/* 학기 */}
+            <div className="flex flex-col gap-[8px] mt-[4px]">
+              <div className="body-sm text-[#3b3b3b]">학기</div>
+              <div className="grid grid-cols-6 gap-[5px]">
+                {SEMESTER_OPTIONS.map((v) => {
+                  const active = selectedSemester === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setSelectedSemester(v)}
+                      className={`
+                        w-[46px] h-[27px] rounded-[20px]
+                        border-2 border-primary-600
+                        caption
+                        flex items-center justify-center
+                        ${active
+                          ? "bg-primary-600 text-gray-100"
+                          : "bg-gray-100 text-primary-600"
+                        }
+                      `}
                     >
-                      {/* 반투명 배경 */}
-                      <button
-                        className="absolute inset-0 bg-black/30"
-                        onClick={() => setFilterOpen(false)}
-                        aria-label="닫기 배경"
-                      />
+                      {v}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                      {/* 팝업 박스 */}
-                      <div
-                        className="
-                          relative
-                          w-[343px] h-[530px]
-                          rounded-[20px] border-2 border-primary-600
-                          bg-[#F6F1ED]
-                          px-[24px] pt-[45px] pb-[15px]
-                          shadow-md
-                          flex flex-col gap-[24px]
-                        "
-                      >
-                        {/* X 버튼 */}
-                        <button
-                          type="button"
-                          className="absolute right-[24px] top-[24px] p-1"
-                          onClick={() => setFilterOpen(false)}
-                          aria-label="닫기"
-                        >
-                          <BiX size={24} color="#5F372F" />
-                        </button>
+            {/* 학년 */}
+            <div className="flex flex-col gap-[8px]">
+              <div className="body-sm text-[#3b3b3b]">학년</div>
+              <div className="grid grid-cols-4">
+                {GradeOptions.map((v) => {
+                  const active = selectedGrade === v.value;
+                  return (
+                    <button
+                      key={v.value}
+                      type="button"
+                      onClick={() => setSelectedGrade(v.value)}
+                      className={`
+                        w-[55px] h-[27px] rounded-[20px]
+                        border-2 border-primary-600
+                        caption
+                        flex items-center justify-center
+                        ${active
+                          ? "bg-primary-600 text-gray-100"
+                          : "bg-gray-100 text-primary-600"
+                        }
+                      `}
+                    >
+                      {v.value}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                        {/* 학기 */}
-                        <div className="flex flex-col gap-[8px] mt-[4px]">
-                          <div className="body-sm text-[#3b3b3b]">학기</div>
-                          <div className="grid grid-cols-6 gap-[5px]">
-                            {SEMESTER_OPTIONS.map((v) => {
-                              const active = selectedSemester === v;
-                              return (
-                                <button
-                                  key={v}
-                                  type="button"
-                                  onClick={() => setSelectedSemester(v)}
-                                  className={`
-                                    w-[46px] h-[27px] rounded-[20px]
-                                    border-2 border-primary-600
-                                    body-caption
-                                    flex items-center justify-center
-                                    ${
-                                      active
-                                        ? "bg-primary-600 text-gray-100"
-                                        : "bg-gray-100 text-primary-600"
-                                    }
-                                  `}
-                                >
-                                  {v}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
+            {/* 전공 */}
+            <div className="flex flex-col gap-[8px]">
+              <div className="body-sm text-[#3b3b3b]">전공</div>
+              <div
+                className="
+                  mt-[3px] h-[46px]
+                  [&_select]:h-full [&_select]:w-full
+                  [&_select]:px-[18px] [&_select]:rounded-[27px]
+                [&_select]:bg-primary-100
+                  [&_select]:border-2 [&_select]:border-primary-600
+                  [&_select]:outline-none [&_select]:ring-0
+                  [&_select]:caption
+                "
+              >
+                <Dropdown
+                  options={MajorOptions}
+                  value={selectedMajor}
+                  onChange={(v) => setSelectedMajor(v)}
+                  placeholder="전공"
+                  font="caption"
+                />
+              </div>
+            </div>
 
-                        {/* 학년 */}
-                        <div className="flex flex-col gap-[8px]">
-                          <div className="body-sm text-[#3b3b3b]">학년</div>
-                          <div className="grid grid-cols-4">
-                            {GRADE_OPTIONS.map((v) => {
-                              const active = selectedGrade === v;
-                              return (
-                                <button
-                                  key={v}
-                                  type="button"
-                                  onClick={() => setSelectedGrade(v)}
-                                  className={`
-                                    w-[55px] h-[27px] rounded-[20px]
-                                    border-2 border-primary-600
-                                    body-caption
-                                    flex items-center justify-center
-                                    ${
-                                      active
-                                        ? "bg-primary-600 text-gray-100"
-                                        : "bg-gray-100 text-primary-600"
-                                    }
-                                  `}
-                                >
-                                  {v}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
+            {/* 교수님 */}
+            <div className="flex flex-col gap-[8px]">
+              <div className="body-sm text-[#3b3b3b]">교수님</div>
+              <div
+                className="
+                  mt-[3px]
+                  h-[46px] flex items-center
+                  rounded-[20px]
+                  bg-primary-100
+                  border-2 border-primary-600
+                "
+              >
+                <Input
+                  type="text"
+                  id="professor"
+                  value={selectProfessor}
+                  onChange={(e) => setProfessor(e.target.value)}
+                  font="caption"
+                />
+              </div>
+            </div>
 
-                        {/* 전공 */}
-                        <div className="flex flex-col gap-[8px]">
-                          <div className="body-sm text-[#3b3b3b]">전공</div>
-                          <div
-                            className="
-                              mt-[3px]
-                              h-[46px]
-                              [&_select]:h-full
-                              [&_select]:w-full
-                              [&_select]:px-[18px]
-                              [&_select]:rounded-[27px]
-                              [&_select]:bg-primary-100 [&_select]:bg-primary-100
-                              [&_select]:border-2 [&_select]:border-primary-600
-                              [&_select]:outline-none [&_select]:ring-0
-                              [&_select]:body-caption
-                            "
-                          >
-                            <Dropdown
-                              options={MajorOptions}
-                              value={selectedMajor}
-                              onChange={(v) => setSelectedMajor(v)}
-                              placeholder="전공"
-                              font="body-caption"
-                            />
-                          </div>
-                        </div>
-
-                        {/* 교수님 */}
-                        <div className="flex flex-col gap-[8px]">
-                          <div className="body-sm text-[#3b3b3b]">교수님</div>
-                          <div
-                            className="
-                              mt-[3px]
-                              h-[46px] flex items-center
-                              rounded-[20px]
-                              bg-primary-100
-                              border-2 border-primary-600
-                            "
-                          >
-                            <Input
-                              type="text"
-                              id="professor"
-                              value={selectProfessor}
-                              onChange={(e) => setProfessor(e.target.value)}
-                              font="body-caption"
-                            />
-                          </div>
-                        </div>
-
-                        {/* 구분 */}
-                        <div className="flex flex-col gap-[8px] mb-[4px]">
-                          <div className="body-sm text-[#3b3b3b]">구분</div>
-                          <div className="flex flex-wrap gap-[10px]">
-                            {["전공", "교양", "기초"].map((v) => {
-                              const active = selectedCategory === v;
-                              return (
-                                <button
-                                  key={v}
-                                  type="button"
-                                  onClick={() => setSelectedCategory(v)}
-                                  className={`
-                                    w-[55px] h-[27px] rounded-[20px]
-                                    border-2 border-primary-600
-                                    body-caption
-                                    flex items-center justify-center
-                                    ${
-                                      active
-                                        ? "bg-primary-600 text-gray-100"
-                                        : "bg-gray-100 text-primary-600"
-                                    }
-                                  `}
-                                >
-                                  {v}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                {/* ===== /필터 팝업 ===== */}
-
-
+            {/* 구분 */}
+            <div className="flex flex-col gap-[8px] mb-[4px]">
+              <div className="body-sm text-[#3b3b3b]">구분</div>
+              <div className="flex flex-wrap gap-[10px]">
+                {["전공", "교양", "기초"].map((v) => {
+                  const active = selectedCategory === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setSelectedCategory(v)}
+                      className={`
+                        w-[55px] h-[27px] rounded-[20px]
+                        border-2 border-primary-600
+                        caption
+                        flex items-center justify-center
+                        ${active
+                          ? "bg-primary-600 text-gray-100"
+                          : "bg-gray-100 text-primary-600"
+                        }
+                      `}
+                    >
+                      {v}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ===== /필터 팝업 ===== */}
     </section>
   );
 }
