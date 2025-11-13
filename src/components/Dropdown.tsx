@@ -70,7 +70,7 @@ export default function Dropdown({
         onClick={handleDropdown}
         aria-expanded={isOpen}
       >
-        <div>{value ? value.value : placeholder}</div>
+        <div>{value ? value.value : placeholder || <>&nbsp;</>}</div>
         {!disabled && (
           <>
             {isOpen ? (

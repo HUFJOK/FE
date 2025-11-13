@@ -9,7 +9,7 @@ import type {
 } from "./types";
 import { formatDateTime } from "./utils";
 
-// 특정 자료 상세 조희
+// 특정 자료 상세 조회
 export const getMaterial = async (
   materialId: number
 ): Promise<MaterialGetResponse> => {

@@ -10,6 +10,7 @@ import {
   SemesterOptions,
   GradeOptions,
   TypeOptions,
+  MajorOptions,
 } from "../../data/OptionData";
 import type { Option } from "../../data/OptionData";
 import { BiX } from "react-icons/bi";
@@ -40,6 +41,7 @@ export default function DataUpload(): React.JSX.Element {
   const [grade, setGrade] = useState<Option | null>(null);
   const [type, setType] = useState<Option | null>(null);
   const [course, setCourse] = useState<string>("");
+  const [major, setMajor] = useState<Option | null>(null);
   const [description, setDescription] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -59,23 +61,14 @@ export default function DataUpload(): React.JSX.Element {
           setDescription(data.description);
           setAttachments(data.attachments);
 
-          setYear(
-            YearOptions.find((opt) => opt.value === String(data.year)) || null,
-          );
-          setSemester(
-            SemesterOptions.find(
-              (opt) => opt.value === String(data.semester),
-            ) || null,
-          );
-          setGrade(
-            GradeOptions.find((opt) => String(opt.value) === data.grade) ||
-            null,
-          );
-          setType(
-            TypeOptions.find(
-              (opt) => String(opt.value) === data.courseDivision,
-            ) || null,
-          );
+          setYear(YearOptions.find((opt) => opt.value === String(data.year)) || null);
+          setSemester(SemesterOptions.find((opt) => opt.value === String(data.semester)) || null);
+          setGrade(GradeOptions.find((opt) => String(opt.value) === data.grade) || null);
+          setType(TypeOptions.find((opt) => String(opt.value) === data.courseDivision) || null);
+
+          if (data.major) {
+            setMajor(MajorOptions.find((opt) => opt.value === data.major) || null);
+          }
         } catch (error) {
           console.error("자료 로딩 실패:", error);
           alert("자료 정보를 불러오는데 실패했습니다.");
@@ -91,8 +84,15 @@ export default function DataUpload(): React.JSX.Element {
       setSemester(SemesterOptions[0]);
       setGrade(GradeOptions[0]);
       setType(TypeOptions[0]);
+      setMajor(MajorOptions[0]);
     }
   }, [isEdit, materialId, navigate]);
+
+  useEffect(() => {
+    if (type?.value !== TypeOptions[0].value) {
+      setMajor(null);
+    }
+  }, [type]);
 
   const handleFileUpload = (): void => {
     fileInputRef.current?.click();
@@ -116,7 +116,8 @@ export default function DataUpload(): React.JSX.Element {
       !professor ||
       !grade ||
       !type ||
-      !course
+      !course ||
+      (type.value === TypeOptions[0].value && !major)
     ) {
       alert("모든 필수 항목을 입력해주세요.");
       return;
@@ -135,6 +136,7 @@ export default function DataUpload(): React.JSX.Element {
       grade: String(grade.value),
       courseDivision: String(type.value),
       courseName: course,
+      major: major ? String(major.value) : null,
       description,
     };
 
@@ -194,71 +196,82 @@ export default function DataUpload(): React.JSX.Element {
           disabled={isLoading}
         />
 
-        <div className="w-full flex justify-start items-center gap-5">
-          <div className="flex-shrink-0 flex flex-col gap-5">
-            <LabelField label="연도" color="gray-700" isFit={true}>
-              <Dropdown
-                options={YearOptions}
-                value={year}
-                onChange={setYear}
-                font="body-md"
-                disabled={isLoading}
-              />
-            </LabelField>
-            <LabelField label="학년" color="gray-700" isFit={true}>
-              <Dropdown
-                options={GradeOptions}
-                value={grade}
-                onChange={setGrade}
-                font="body-md"
-                disabled={isLoading}
-              />
-            </LabelField>
+        <div className="w-full flex flex-col justify-start items-center gap-5">
+          <div className="w-full flex justify-start items-center gap-5">
+            <div className="flex-shrink-0 flex flex-col gap-5">
+              <LabelField label="연도" color="gray-700" isFit={true}>
+                <Dropdown
+                  options={YearOptions}
+                  value={year}
+                  onChange={setYear}
+                  font="body-md"
+                  disabled={isLoading}
+                />
+              </LabelField>
+              <LabelField label="학년" color="gray-700" isFit={true}>
+                <Dropdown
+                  options={GradeOptions}
+                  value={grade}
+                  onChange={setGrade}
+                  font="body-md"
+                  disabled={isLoading}
+                />
+              </LabelField>
+            </div>
+            <div className="flex-shrink-0 flex flex-col gap-5">
+              <LabelField label="학기" color="gray-700" isFit={true}>
+                <Dropdown
+                  options={SemesterOptions}
+                  value={semester}
+                  onChange={setSemester}
+                  font="body-md"
+                  disabled={isLoading}
+                />
+              </LabelField>
+              <LabelField label="구분" color="gray-700" isFit={true}>
+                <Dropdown
+                  options={TypeOptions}
+                  value={type}
+                  onChange={setType}
+                  font="body-md"
+                  disabled={isLoading}
+                />
+              </LabelField>
+            </div>
+            <div className="flex-grow flex flex-col gap-5">
+              <LabelField label="담당교수" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="professor"
+                  value={professor}
+                  onChange={(e) => setProfessor(e.target.value)}
+                  placeholder="담당교수 성함을 입력하세요"
+                  font="body-md"
+                  disabled={isLoading}
+                />
+              </LabelField>
+              <LabelField label="교과목명" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="course"
+                  value={course}
+                  onChange={(e) => setCourse(e.target.value)}
+                  placeholder="교과목명을 입력하세요"
+                  font="body-md"
+                  disabled={isLoading}
+                />
+              </LabelField>
+            </div>
           </div>
-          <div className="flex-shrink-0 flex flex-col gap-5">
-            <LabelField label="학기" color="gray-700" isFit={true}>
-              <Dropdown
-                options={SemesterOptions}
-                value={semester}
-                onChange={setSemester}
-                font="body-md"
-                disabled={isLoading}
-              />
-            </LabelField>
-            <LabelField label="구분" color="gray-700" isFit={true}>
-              <Dropdown
-                options={TypeOptions}
-                value={type}
-                onChange={setType}
-                font="body-md"
-                disabled={isLoading}
-              />
-            </LabelField>
-          </div>
-          <div className="flex-grow flex flex-col gap-5">
-            <LabelField label="담당교수" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="professor"
-                value={professor}
-                onChange={(e) => setProfessor(e.target.value)}
-                placeholder="담당교수 성함을 입력하세요"
-                font="body-md"
-                disabled={isLoading}
-              />
-            </LabelField>
-            <LabelField label="교과목명" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="course"
-                value={course}
-                onChange={(e) => setCourse(e.target.value)}
-                placeholder="교과목명을 입력하세요"
-                font="body-md"
-                disabled={isLoading}
-              />
-            </LabelField>
-          </div>
+          <LabelField label="전공" color="gray-700" isFit={true}>
+            <Dropdown
+              options={MajorOptions}
+              value={major}
+              onChange={setMajor}
+              font="body-md"
+              disabled={isLoading || type?.value !== TypeOptions[0].value}
+            />
+          </LabelField>
         </div>
 
         <Textarea
