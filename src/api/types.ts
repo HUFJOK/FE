@@ -87,6 +87,7 @@ export interface MaterialGetResponse {
   grade: string;
   courseDivision: string;
   courseName: string;
+  major: string | null;
   description: string;
   authorName: string;
   authorId: number;
@@ -106,6 +107,7 @@ export interface MaterialRequest {
   grade: string;
   courseDivision: string;
   courseName: string;
+  major: string | null;
   description: string;
 }
 
@@ -118,6 +120,7 @@ export interface MaterialUpdateResponse {
   grade: string;
   courseDivision: string;
   courseName: string;
+  major: string | null;
   description: string;
   updatedAt: string;
 }
@@ -130,6 +133,9 @@ export interface MaterialSummary {
   professorName: string;
   grade: string;
   courseDivision: string;
+  major: string | null;
+  reviewCount: number;
+  downloadCount: number;
 }
 
 export interface MaterialListResponse {
@@ -146,6 +152,7 @@ export interface MaterialCreateResponse {
   grade: string;
   courseDivision: string;
   courseName: string;
+  major: string | null;
   description: string;
   createdAt: string;
   earnedPoints: number;

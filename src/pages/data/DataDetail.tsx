@@ -16,6 +16,7 @@ export default function DataDetail(): React.JSX.Element {
   const [grade, setGrade] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [course, setCourse] = useState<string>("");
+  const [major, setMajor] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [isPurchased, setIsPurchased] = useState<boolean>(false);
   const [reviewRating, setReviewRating] = useState<number>(0.0);
@@ -31,6 +32,7 @@ export default function DataDetail(): React.JSX.Element {
     setGrade("1학년");
     setType("전공");
     setCourse("컴퓨팅 사고");
+    setMajor("");
     setDescription("2025-1 컴퓨팅 사고 중간고사 족보");
     setReviews([
       {
@@ -72,73 +74,85 @@ export default function DataDetail(): React.JSX.Element {
           <div className="text-primary-500 title-sm">{price}P</div>
         </div>
 
-        <div className="w-full flex justify-start items-center gap-5">
-          <div className="w-43 flex-shrink-0 flex flex-col gap-5">
-            <LabelField label="연도" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="year"
-                value={year.toString()}
-                onChange={(e) => setYear(Number(e.target.value))}
-                font="body-md"
-                disabled={true}
-              />
-            </LabelField>
-            <LabelField label="학년" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="grade"
-                value={grade}
-                onChange={(e) => setGrade(e.target.value)}
-                font="body-md"
-                disabled={true}
-              />
-            </LabelField>
+        <div className="w-full flex flex-col justify-start items-center gap-5">
+          <div className="w-full flex justify-start items-center gap-5">
+            <div className="w-43 flex-shrink-0 flex flex-col gap-5">
+              <LabelField label="연도" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="year"
+                  value={year.toString()}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                  font="body-md"
+                  disabled={true}
+                />
+              </LabelField>
+              <LabelField label="학년" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="grade"
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  font="body-md"
+                  disabled={true}
+                />
+              </LabelField>
+            </div>
+            <div className="w-43 flex-shrink-0 flex flex-col gap-5">
+              <LabelField label="학기" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="semester"
+                  value={semester.toString()}
+                  onChange={(e) => setSemester(Number(e.target.value))}
+                  font="body-md"
+                  disabled={true}
+                />
+              </LabelField>
+              <LabelField label="구분" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="type"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  font="body-md"
+                  disabled={true}
+                />
+              </LabelField>
+            </div>
+            <div className="flex-grow flex flex-col gap-5">
+              <LabelField label="담당교수" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="professor"
+                  value={professor}
+                  onChange={(e) => setProfessor(e.target.value)}
+                  font="body-md"
+                  disabled={true}
+                />
+              </LabelField>
+              <LabelField label="교과목명" color="gray-700" isFit={true}>
+                <Input
+                  type="text"
+                  id="course"
+                  value={course}
+                  onChange={(e) => setCourse(e.target.value)}
+                  font="body-md"
+                  disabled={true}
+                />
+              </LabelField>
+            </div>
           </div>
-          <div className="w-43 flex-shrink-0 flex flex-col gap-5">
-            <LabelField label="학기" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="semester"
-                value={semester.toString()}
-                onChange={(e) => setSemester(Number(e.target.value))}
-                font="body-md"
-                disabled={true}
-              />
-            </LabelField>
-            <LabelField label="구분" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="category"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                font="body-md"
-                disabled={true}
-              />
-            </LabelField>
-          </div>
-          <div className="flex-grow flex flex-col gap-5">
-            <LabelField label="담당교수" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="professor"
-                value={professor}
-                onChange={(e) => setProfessor(e.target.value)}
-                font="body-md"
-                disabled={true}
-              />
-            </LabelField>
-            <LabelField label="교과목명" color="gray-700" isFit={true}>
-              <Input
-                type="text"
-                id="course"
-                value={course}
-                onChange={(e) => setCourse(e.target.value)}
-                font="body-md"
-                disabled={true}
-              />
-            </LabelField>
-          </div>
+          <LabelField label="전공" color="gray-700" isFit={true}>
+            <Input
+              type="text"
+              id="major"
+              value={major}
+              onChange={(e) => setMajor(e.target.value)}
+              font="body-md"
+              disabled={true}
+            />
+          </LabelField>
         </div>
 
         <Textarea
