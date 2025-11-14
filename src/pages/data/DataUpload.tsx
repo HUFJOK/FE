@@ -104,7 +104,7 @@ export default function DataUpload(): React.JSX.Element {
     }
   };
 
-  const handleRemoveFile = (fileName: string): void => {
+  const handleFileRemove = (fileName: string): void => {
     setFiles(files.filter((file) => file.name !== fileName));
   };
 
@@ -328,7 +328,7 @@ export default function DataUpload(): React.JSX.Element {
                         {file.name}
                         <BiX
                           className="w-5 h-5 text-primary-500"
-                          onClick={() => handleRemoveFile(file.name)}
+                          onClick={() => handleFileRemove(file.name)}
                         />
                       </li>
                     ))}

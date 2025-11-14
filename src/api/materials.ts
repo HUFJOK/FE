@@ -93,7 +93,17 @@ export const createMaterial = async (
   return response.data;
 };
 
-// 자료 파일 다운로드 (자료 구매)
+// 자료 구매
+export const purchaseMaterial = async (
+  materialId: number
+): Promise<HttpErrorResponse> => {
+  const response = await apiClient.post<HttpErrorResponse>(
+    `/api/v1/materials/${materialId}/purchase`
+  );
+  return response.data;
+};
+
+// 자료 파일 다운로드
 export const downloadMaterial = async (
   materialId: number,
   attachmentId: number
