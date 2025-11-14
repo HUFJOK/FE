@@ -22,10 +22,10 @@ export default function Loading(): React.JSX.Element {
 
         if (isAxiosError(error)) {
           if (error.response?.status !== 401) {
-            navigate("/login", { replace: true });
+            navigate("/", { replace: true });
           }
         } else {
-          navigate("/login", { replace: true });
+          navigate("/", { replace: true });
         }
       }
     };
