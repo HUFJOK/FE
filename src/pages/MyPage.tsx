@@ -44,14 +44,16 @@ export default function MyPage(): React.JSX.Element {
         setEmailInput(userData.email);
         setNicknameInput(userData.nickname);
 
-        const major = MajorOptions.find((opt) => opt.value === userData.major) || null;
+        const major =
+          MajorOptions.find((opt) => opt.value === userData.major) || null;
         setMajorOption(major);
 
         let minor: Option | null;
         if (userData.minor === null) {
           minor = MajorOptions.find((opt) => opt.value === "없음") || null;
         } else {
-          minor = MajorOptions.find((opt) => opt.value === userData.minor) || null;
+          minor =
+            MajorOptions.find((opt) => opt.value === userData.minor) || null;
         }
         setMinorOption(minor);
 
@@ -84,7 +86,10 @@ export default function MyPage(): React.JSX.Element {
 
       setIsSaving(true);
       try {
-        const minorValue = minorOption && minorOption.value !== "없음" ? minorOption.value : null;
+        const minorValue =
+          minorOption && minorOption.value !== "없음"
+            ? minorOption.value
+            : null;
         const updateData: UserUpdateRequest = {
           nickname: nicknameInput,
           major: majorOption.value,

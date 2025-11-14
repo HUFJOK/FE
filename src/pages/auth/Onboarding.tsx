@@ -1,4 +1,3 @@
-// src/pages/auth/Onboarding.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
@@ -29,7 +28,7 @@ export default function Onboarding(): React.JSX.Element {
         setEmail(user.email ?? "");
         setName(user.nickname ?? "");
 
-        // 본전공 
+        // 본전공
         if (user.major) {
           const foundMajor =
             MajorOptions.find((opt) => opt.value === user.major) || null;
@@ -83,14 +82,14 @@ export default function Onboarding(): React.JSX.Element {
       <header className="w-full">
         <img
           src={Logo}
-          alt="HUFS JOK 로고"
+          alt="HUFSJOK 로고"
           className="w-[100px] h-[100px] ml-[28px] mt-[24px] object-contain"
           draggable={false}
         />
       </header>
 
       {/* 폼 영역 */}
-      <section className="max-w-[920px] mx-auto mt-[49px] px-4">
+      <section className="w-195 max-w-[920px] mx-auto mt-[49px]">
         <form onSubmit={handleSubmit} className="flex flex-col">
           <div className="flex flex-col gap-[40px]">
             {/* 학교 이메일 */}
@@ -101,12 +100,11 @@ export default function Onboarding(): React.JSX.Element {
               required
               placeholder="학교 이메일"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              readOnly
               className="
-                w-full box-border h-[53px] px-[19px] py-[9px]
-                rounded-[12px] border-2 border-primary-600
-                title-sm
-                text-gray-700 placeholder-gray-400
+                w-full box-border px-5 py-2.5
+                rounded-xl border-2 border-primary-600
+                title-sm text-gray-700 placeholder-gray-400
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
               "
             />
@@ -118,12 +116,11 @@ export default function Onboarding(): React.JSX.Element {
               required
               placeholder="닉네임"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              readOnly
               className="
-                w-full box-border h-[53px] px-[19px] py-[9px]
-                rounded-[12px] border-2 border-primary-600
-                title-sm
-                text-gray-700 placeholder-gray-400
+                w-full box-border px-5 py-2.5
+                rounded-xl border-2 border-primary-600
+                title-sm text-gray-700 placeholder-gray-400
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
               "
             />
@@ -139,12 +136,11 @@ export default function Onboarding(): React.JSX.Element {
               }}
               required
               className={`
-                w-full box-border h-[53px] px-[19px] py-[9px]
-                rounded-[12px] border-2 border-primary-600 bg-white
-                title-sm
+                w-full box-border px-5 py-2.5
+                rounded-xl border-2 border-primary-600 bg-white
+                title-sm ${major ? "text-gray-700" : "text-gray-400"}
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
-                appearance-none
-                ${major ? "text-gray-700" : "text-gray-400"}
+                appearance-none                
               `}
             >
               <option value="" disabled hidden>
@@ -167,12 +163,11 @@ export default function Onboarding(): React.JSX.Element {
                 setMinor(found);
               }}
               className={`
-                w-full box-border h-[53px] px-[19px] py-[9px]
-                rounded-[12px] border-2 border-primary-600 bg-white
-                title-sm
+                w-full box-border px-5 py-2.5
+                rounded-xl border-2 border-primary-600 bg-white
+                title-sm ${major ? "text-gray-700" : "text-gray-400"}
                 focus:outline-none focus:ring-4 focus:ring-primary-600/20
-                appearance-none
-                ${minor ? "text-gray-700" : "text-gray-400"}
+                appearance-none                
               `}
             >
               <option value="" disabled hidden>
@@ -188,19 +183,13 @@ export default function Onboarding(): React.JSX.Element {
 
           {/* 완료 버튼 */}
           <div className="w-full flex justify-center mt-[100px]">
-            <button
-              type="submit"
-              className="w-[141px] h-[51px]"
-              disabled={loading}
-            >
-              <div className="[&>div]:flex [&>div]:items-center [&>div]:justify-center [&>div]:h-full">
-                <Button
-                  text={loading ? "저장 중..." : "완료"}
-                  font="title-sm"
-                  color={600}
-                  isFull
-                />
-              </div>
+            <button type="submit" className="w-35 h-12.5" disabled={loading}>
+              <Button
+                text={loading ? "저장 중..." : "완료"}
+                font="title-sm"
+                color={600}
+                isFull
+              />
             </button>
           </div>
         </form>

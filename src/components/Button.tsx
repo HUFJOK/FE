@@ -69,7 +69,12 @@ export default function Button({
   };
 
   return (
-    <button type="button" className={getButtonClasses()} onClick={onClick} disabled={disabled}>
+    <button
+      type="button"
+      className={getButtonClasses()}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {text}
     </button>
   );

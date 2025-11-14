@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { BiSearch, BiX } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import type { Option } from "../data/OptionData";
-import { GradeOptions, MajorOptions } from "../data/OptionData";
+import { GradeOptions, MajorOptions, TypeOptions } from "../data/OptionData";
 import Input from "../components/Input";
 import Dropdown from "../components/Dropdown";
 import Button from "../components/Button";
@@ -10,9 +10,10 @@ import { getMaterials } from "../api/materials";
 import type { MaterialListResponse, MaterialSummary } from "../api/types";
 
 /** 학기 표시 방식 */
-function parseYearSemester(
-  label: string | null,
-): { year?: number; semester?: number } {
+function parseYearSemester(label: string | null): {
+  year?: number;
+  semester?: number;
+} {
   if (!label) return {};
   const [yy, sem] = label.split("-");
   const yyNum = Number(yy);
@@ -45,8 +46,7 @@ function Chip({ children }: { children: React.ReactNode }) {
       className="
         inline-flex items-center justify-center
         w-[77px] h-[36px] rounded-[20px]
-        body-md
-        bg-gray-100 text-primary-600 border border-primary-600
+        body-md bg-gray-100 text-primary-600 border border-primary-600
       "
     >
       {children}
@@ -68,7 +68,7 @@ function DocCard({
     <article
       onClick={onClick}
       className="
-        w-full box-border rounded-[12px] bg-white px-[28px] py-[18px]
+        w-full box-border rounded-xl bg-white px-[28px] py-[18px]
         border-2 border-primary-600 cursor-pointer
         transition hover:shadow-sm
       "
@@ -86,7 +86,7 @@ function DocCard({
           </p>
         </div>
 
-        <div className="ml-[16px] shrink-0 text-right body-sm text-[#5B5B5B]">
+        <div className="ml-[16px] shrink-0 text-right body-sm text-gray-500">
           <div>다운로드 {item.downloadCount ?? 0}회</div>
           <div>리뷰 {item.reviewCount ?? 0}개</div>
           <div className="text-primary-600 mt-[2px]">200P</div>
@@ -234,7 +234,7 @@ export default function MainContent(): React.JSX.Element {
   }, [currentPage, totalPages]);
 
   return (
-    <section className="relative max-w-[1120px] mx-auto px-4 pt-[28px] pb-[60px]">
+    <section className="relative w-250 max-w-[1120px] mx-auto pt-[28px] pb-[60px]">
       {/* 올리기 버튼 */}
       <div className="absolute right-0 top-[20px]">
         <Button
@@ -249,11 +249,9 @@ export default function MainContent(): React.JSX.Element {
       <div className="flex justify-center mt-[50px] mb-[20px]">
         <div
           className="
-            flex items-center
-            w-full max-w-[770px] h-[63px]
-            px-[24px]
-            rounded-[20px] border-2 border-primary-600
-            bg-[#F4F4F4]
+            flex items-center bg-gray-100
+            w-full max-w-[770px] h-[63px] px-[24px]
+            rounded-xl border-2 border-primary-600
           "
         >
           <div className="flex-1 [&_input]:bg-transparent [&_input]:border-none [&_input]:outline-none [&_input]:shadow-none">
@@ -281,8 +279,7 @@ export default function MainContent(): React.JSX.Element {
           className="
             inline-flex items-center justify-center
             w-[77px] h-[36px] rounded-[20px]
-            body-md
-            bg-primary-500 text-gray-100
+            body-md bg-primary-500 text-gray-100
           "
         >
           필터링
@@ -306,7 +303,7 @@ export default function MainContent(): React.JSX.Element {
             onClick={() => setSortOpen((s) => !s)}
           />
           {sortOpen && (
-            <div className="absolute z-10 mt-2 w-[120px] rounded-[10px] border-2 bg-white shadow-sm overflow-hidden border-primary-600">
+            <div className="absolute z-10 mt-2 w-[120px] rounded-xl border-2 bg-white shadow-sm overflow-hidden border-primary-600">
               {(["추천순", "다운로드순", "최신순"] as const).map((it) => (
                 <button
                   key={it}
@@ -314,7 +311,6 @@ export default function MainContent(): React.JSX.Element {
                   onClick={() => {
                     setSortLabel(it);
                     setSortOpen(false);
-                    setCurrentPage(1);
                   }}
                 >
                   {it}
@@ -343,7 +339,7 @@ export default function MainContent(): React.JSX.Element {
           />
         ))}
         {!loading && !errorMsg && viewList.length === 0 && (
-          <div className="text-center text-[#5B5B5B] body-md">
+          <div className="text-center text-gray-500 body-md">
             검색 조건에 맞는 자료가 없습니다.
           </div>
         )}
@@ -357,7 +353,7 @@ export default function MainContent(): React.JSX.Element {
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={!canPrev}
             className={`
-              px-3 py-1 rounded-full text-sm
+              px-3 py-1 rounded-full body-sm
               ${canPrev ? "text-primary-600 hover:bg-primary-50" : "text-gray-300 cursor-not-allowed"}
             `}
           >
@@ -387,7 +383,7 @@ export default function MainContent(): React.JSX.Element {
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={!canNext}
             className={`
-              px-3 py-1 rounded-full text-sm
+              px-3 py-1 rounded-full body-sm
               ${canNext ? "text-primary-600 hover:bg-primary-50" : "text-gray-300 cursor-not-allowed"}
             `}
           >
@@ -415,7 +411,7 @@ export default function MainContent(): React.JSX.Element {
             className="
               relative
               w-[343px] h-[570px]
-              rounded-[20px] border-2 border-primary-600 bg-[#F6F1ED]
+              rounded-[20px] border-2 border-primary-600 bg-primary-100
               px-[24px] pt-[45px] pb-[15px]
               shadow-md
               flex flex-col gap-[24px]
@@ -428,12 +424,12 @@ export default function MainContent(): React.JSX.Element {
               onClick={() => setFilterOpen(false)}
               aria-label="닫기"
             >
-              <BiX size={24} color="#5F372F" />
+              <BiX size={24} className="text-primary-600" />
             </button>
 
             {/* 학기 */}
             <div className="flex flex-col gap-[8px] mt-[4px]">
-              <div className="body-sm text-[#3b3b3b]">학기</div>
+              <div className="body-sm text-gray-600">학기</div>
               <div className="grid grid-cols-6 gap-[5px]">
                 {SEMESTER_OPTIONS.map((v) => {
                   const active = selectedSemester === v;
@@ -452,8 +448,8 @@ export default function MainContent(): React.JSX.Element {
                         flex items-center justify-center
                         ${
                           active
-                            ? "bg-primary-600 text-gray-100"
-                            : "bg-gray-100 text-primary-600"
+                            ? "bg-primary-600 text-white"
+                            : "bg-white text-primary-600"
                         }
                       `}
                     >
@@ -466,7 +462,7 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 학년 */}
             <div className="flex flex-col gap-[8px]">
-              <div className="body-sm text-[#3b3b3b]">학년</div>
+              <div className="body-sm text-gray-600">학년</div>
               <div className="grid grid-cols-4">
                 {GradeOptions.map((v) => {
                   const active = selectedGrade === v.value;
@@ -476,7 +472,6 @@ export default function MainContent(): React.JSX.Element {
                       type="button"
                       onClick={() => {
                         setSelectedGrade(v.value);
-                        setCurrentPage(1);
                       }}
                       className={`
                         w-[55px] h-[27px] rounded-[20px]
@@ -485,8 +480,8 @@ export default function MainContent(): React.JSX.Element {
                         flex items-center justify-center
                         ${
                           active
-                            ? "bg-primary-600 text-gray-100"
-                            : "bg-gray-100 text-primary-600"
+                            ? "bg-primary-600 text-white"
+                            : "bg-white text-primary-600"
                         }
                       `}
                     >
@@ -499,24 +494,19 @@ export default function MainContent(): React.JSX.Element {
 
             {/* 전공 */}
             <div className="flex flex-col gap-[8px]">
-              <div className="body-sm text-[#3b3b3b]">전공</div>
+              <div className="body-sm text-gray-600">전공</div>
               <div
                 className="
-                  mt-[3px] h-[46px]
-                  [&_select]:h-full [&_select]:w-full
-                  [&_select]:px-[18px] [&_select]:rounded-[27px]
-                  [&_select]:bg-primary-100
-                  [&_select]:border-2 [&_select]:border-primary-600
-                  [&_select]:outline-none [&_select]:ring-0
-                  [&_select]:caption
-                "
+                  h-[46px]
+                  [&>div>div]:border-2 [&>div>div]:border-primary-600
+                  [&>div>div]:outline-none [&>div>div]:ring-0
+                 "
               >
                 <Dropdown
                   options={MajorOptions}
                   value={selectedMajor}
                   onChange={(v) => {
                     setSelectedMajor(v);
-                    setCurrentPage(1);
                   }}
                   placeholder="전공"
                   font="caption"
@@ -529,10 +519,8 @@ export default function MainContent(): React.JSX.Element {
               <div className="body-sm text-[#3b3b3b]">교수님</div>
               <div
                 className="
-                  mt-[3px]
                   h-[46px] flex items-center
-                  rounded-[20px]
-                  bg-primary-100
+                  rounded-xl bg-white
                   border-2 border-primary-600
                   professor-input-wrapper
                 "
@@ -543,40 +531,30 @@ export default function MainContent(): React.JSX.Element {
                   value={selectProfessor}
                   onChange={(e) => {
                     setProfessor(e.target.value);
-                    setCurrentPage(1);
                   }}
                   placeholder="교수명 입력"
                   className="
-                    w-full
-                    bg-transparent
-                    ml-5
-                    border-none
-                    outline-none
-                    shadow-none
-                    font-[Pretendard]
-                    text-[14px]
-                    text-primary-700
+                    w-full bg-transparent ml-5
+                    border-none outline-none shadow-none
+                    caption text-primary-700
                     placeholder:text-gray-400
                   "
                 />
               </div>
             </div>
 
-
-
             {/* 구분 */}
             <div className="flex flex-col gap-[8px] mb-[4px]">
-              <div className="body-sm text-[#3b3b3b]">구분</div>
+              <div className="body-sm text-gray-600">구분</div>
               <div className="flex flex-wrap gap-[10px]">
-                {["전공", "교양", "기초"].map((v) => {
-                  const active = selectedCategory === v;
+                {TypeOptions.map((v) => {
+                  const active = selectedCategory === v.value;
                   return (
                     <button
-                      key={v}
+                      key={v.index}
                       type="button"
                       onClick={() => {
-                        setSelectedCategory(v);
-                        setCurrentPage(1);
+                        setSelectedCategory(v.value);
                       }}
                       className={`
                         w-[55px] h-[27px] rounded-[20px]
@@ -585,12 +563,12 @@ export default function MainContent(): React.JSX.Element {
                         flex items-center justify-center
                         ${
                           active
-                            ? "bg-primary-600 text-gray-100"
-                            : "bg-gray-100 text-primary-600"
+                            ? "bg-primary-600 text-white"
+                            : "bg-white text-primary-600"
                         }
                       `}
                     >
-                      {v}
+                      {v.value}
                     </button>
                   );
                 })}

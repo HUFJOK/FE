@@ -24,8 +24,8 @@ export default function AppRouter(): React.JSX.Element {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Setting />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/setting" element={<Setting />} />
+        <Route path="/" element={<Login />} />
         <Route path="/loading" element={<Loading />} />
         <Route path="/onboarding" element={<Onboarding />} />
 
