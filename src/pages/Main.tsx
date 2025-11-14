@@ -181,7 +181,7 @@ export default function MainContent(): React.JSX.Element {
           text="올리기"
           font="body-lg"
           color={600}
-          onClick={() => navigate("../data/upload")}
+          onClick={() => navigate("/data/upload")}
         />
       </div>
 
@@ -249,7 +249,7 @@ export default function MainContent(): React.JSX.Element {
               {(["추천순", "다운로드순", "최신순"] as const).map((it) => (
                 <button
                   key={it}
-                  className="w-full text-left px-3 py-2 hover:bg-primary-100 font-[Pretendard] text-[14px] font-semibold text-primary-600"
+                  className="w-full text-left px-3 py-2 hover:bg-primary-100 body-sm font-semibold text-primary-600"
                   onClick={() => {
                     setSortLabel(it);
                     setSortOpen(false);
