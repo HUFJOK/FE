@@ -21,8 +21,8 @@ apiClient.interceptors.response.use(
   (error) => {
     // 401 Unauthenticated 에러 처리
     if (error.response && error.response.status === 401) {
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (window.location.pathname !== "/") {
+        window.location.href = "/";
       }
     }
     return Promise.reject(error);

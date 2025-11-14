@@ -23,7 +23,7 @@ export default function Navigation(): React.JSX.Element {
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       console.error("로그아웃에 실패했습니다:", error);
       alert("로그아웃 중 오류가 발생했습니다. 다시 시도해 주세요.");
