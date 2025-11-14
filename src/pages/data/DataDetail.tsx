@@ -7,9 +7,25 @@ import Button from "../../components/Button";
 import StarRating from "../../components/DataDetail/StarRating";
 import RatingInput from "../../components/DataDetail/RatingInput";
 import ReviewBox from "../../components/DataDetail/ReviewBox";
-import type { MaterialGetResponse, UserResponse, ReviewResponse, ReviewCreateRequest, ReviewUpdateRequest } from "../../api/types";
-import { deleteMaterial, downloadMaterial, getMaterial, purchaseMaterial } from "../../api/materials";
-import { createReview, updateReview, deleteReview, getReviews } from "../../api/reviews";
+import type {
+  MaterialGetResponse,
+  UserResponse,
+  ReviewResponse,
+  ReviewCreateRequest,
+  ReviewUpdateRequest,
+} from "../../api/types";
+import {
+  deleteMaterial,
+  downloadMaterial,
+  getMaterial,
+  purchaseMaterial,
+} from "../../api/materials";
+import {
+  createReview,
+  updateReview,
+  deleteReview,
+  getReviews,
+} from "../../api/reviews";
 import { checkMyDownloadedMaterials, getUser } from "../../api/users";
 import { usePointStore } from "../../store/pointStore";
 import JSZip from "jszip";
@@ -61,7 +77,9 @@ export default function DataDetail(): React.JSX.Element {
           setIsPurchased(purchased);
         }
 
-        const myReviewData = reviewsData.find((review) => review.author === true);
+        const myReviewData = reviewsData.find(
+          (review) => review.author === true,
+        );
         if (myReviewData) {
           setMyReview(myReviewData);
           setReviews(reviewsData.filter((review) => review.author !== true));
@@ -102,12 +120,17 @@ export default function DataDetail(): React.JSX.Element {
         const zip = new JSZip();
 
         for (const attachment of material.attachments) {
-          const file = await downloadMaterial(material.materialId, attachment.id);
+          const file = await downloadMaterial(
+            material.materialId,
+            attachment.id,
+          );
 
           if ("blob" in file) {
             zip.file(attachment.originalFileName, file.blob);
           } else {
-            console.warn(`'${attachment.originalFileName}' 파일 다운로드에 실패하여 압축에서 제외합니다.`);
+            console.warn(
+              `'${attachment.originalFileName}' 파일 다운로드에 실패하여 압축에서 제외합니다.`,
+            );
           }
         }
 
@@ -354,30 +377,59 @@ export default function DataDetail(): React.JSX.Element {
           </ul>
         )}
 
-        {isAuthor
-          ? (
-            <div className="w-full flex justify-center items-center gap-2.5">
-              <Button text="다운로드" font="body-lg" color={600} isFull={true} onClick={handleDownload} />
-              <Button text="수정" font="body-lg" color={600} isFull={true} onClick={() => navigate(`/data/edit/${materialId}`)} />
-              <Button text="삭제" font="body-lg" color={600} isFull={true} onClick={handleDelete} />
+        {isAuthor ? (
+          <div className="w-full flex justify-center items-center gap-2.5">
+            <Button
+              text="다운로드"
+              font="body-lg"
+              color={600}
+              isFull={true}
+              onClick={handleDownload}
+            />
+            <Button
+              text="수정"
+              font="body-lg"
+              color={600}
+              isFull={true}
+              onClick={() => navigate(`/data/edit/${materialId}`)}
+            />
+            <Button
+              text="삭제"
+              font="body-lg"
+              color={600}
+              isFull={true}
+              onClick={handleDelete}
+            />
+          </div>
+        ) : (
+          <div className="w-full flex flex-col justify-start items-center gap-2.5">
+            <Button
+              text={isPurchased ? "다운로드" : "구매"}
+              font="body-lg"
+              color={600}
+              isFull={true}
+              onClick={isPurchased ? handleDownload : handlePurchase}
+            />
+            <div className="caption text-red-500">
+              게시자가 삭제 시 다운로드 불가하니 즉시 다운받으시길 바랍니다.
             </div>
-          ) : (
-            <div className="w-full flex flex-col justify-start items-center gap-2.5">
-              <Button
-                text={isPurchased ? "다운로드" : "구매"}
-                font="body-lg"
-                color={600}
-                isFull={true}
-                onClick={isPurchased ? handleDownload : handlePurchase}
-              />
-              <div className="caption text-red-500">
-                게시자가 삭제 시 다운로드 불가하니 즉시 다운받으시길 바랍니다.
-              </div>
-            </div>
-          )}
+          </div>
+        )}
 
         <div className="w-full flex flex-col gap-5">
-          <div className="title-sm text-gray-700">후기</div>
+          <div className="title-sm text-gray-700">
+            후기
+            {material.avgRating !== null && (
+              <span className="body-lg">
+                <span className="ml-2.5 text-primary-400">
+                  {material.avgRating}
+                </span>
+                <span className="ml-1 text-gray-400 font-normal">
+                  ({material.reviewCount})
+                </span>
+              </span>
+            )}
+          </div>
           {isPurchased && !isAuthor && (isReviewEdit || !myReview) && (
             <div className="flex justify-start items-center gap-2.5">
               <StarRating rating={reviewRating} />
@@ -412,14 +464,16 @@ export default function DataDetail(): React.JSX.Element {
             </div>
           )}
 
-          {myReview && !isReviewEdit && <ReviewBox
-            rating={myReview.rating}
-            date={myReview.createdAt}
-            content={myReview.comment}
-            isAuthor={myReview.author}
-            onEdit={handleReviewEdit}
-            onDelete={() => handleReviewDelete(myReview.reviewId)}
-          />}
+          {myReview && !isReviewEdit && (
+            <ReviewBox
+              rating={myReview.rating}
+              date={myReview.createdAt}
+              content={myReview.comment}
+              isAuthor={myReview.author}
+              onEdit={handleReviewEdit}
+              onDelete={() => handleReviewDelete(myReview.reviewId)}
+            />
+          )}
 
           {reviews.map((review) => (
             <ReviewBox

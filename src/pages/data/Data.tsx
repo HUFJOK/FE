@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import {
   getMyDownloadedMaterials,
   getMyUploadedMaterials,
 } from "../../api/users";
-import { deleteMaterial, getMaterial } from "../../api/materials";
-import type { MaterialGetResponse } from "../../api/types";
+import { deleteMaterial } from "../../api/materials";
+import type { MaterialSummary } from "../../api/types";
 
 /** 우측 하단 버튼*/
 function RowButton({
@@ -23,7 +23,12 @@ function RowButton({
         e.stopPropagation();
         onClick();
       }}
-      className="inline-flex items-center justify-center px-[10px] py-[5px] rounded-[12px] border-2 bg-primary-100 border-primary-700 text-primary-700 body-md tracking-[-0.4px]"
+      className="
+        inline-flex items-center justify-center
+        px-[10px] py-[5px] rounded-xl border-2
+        bg-primary-100 border-primary-700
+        text-primary-700 body-md tracking-[-0.4px]
+      "
     >
       {children}
     </button>
@@ -38,7 +43,7 @@ function DocRow({
   onDelete,
   onOpenDetail,
 }: {
-  item: MaterialGetResponse;
+  item: MaterialSummary;
   tab: "buy" | "sell";
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
@@ -48,8 +53,8 @@ function DocRow({
 
   return (
     <article
-      onClick={() => onOpenDetail(item.materialId)}
-      className="relative cursor-pointer w-[940px] rounded-[12px] px-[20px] py-[26px] bg-primary-100"
+      onClick={() => onOpenDetail(item.id)}
+      className="relative cursor-pointer w-[940px] rounded-xl px-[20px] py-[26px] bg-primary-100"
     >
       <div className="flex items-start pr-[20px]">
         <div className="flex-1 min-w-0">
@@ -77,11 +82,11 @@ function DocRow({
       <div className="absolute right-[20px] bottom-[20px] flex gap-[10px]">
         {tab === "sell" ? (
           <>
-            <RowButton onClick={() => onEdit(item.materialId)}>수정</RowButton>
-            <RowButton onClick={() => onDelete(item.materialId)}>삭제</RowButton>
+            <RowButton onClick={() => onEdit(item.id)}>수정</RowButton>
+            <RowButton onClick={() => onDelete(item.id)}>삭제</RowButton>
           </>
         ) : (
-          <RowButton onClick={() => onDelete(item.materialId)}>삭제</RowButton>
+          <RowButton onClick={() => onDelete(item.id)}>삭제</RowButton>
         )}
       </div>
     </article>
@@ -92,46 +97,50 @@ export default function Data(): React.JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [tab, setTab] = useState<"buy" | "sell">(location.state?.tab === "sell" ? "sell" : "buy");
-  const [items, setItems] = useState<MaterialGetResponse[]>([]);
+  const [tab, setTab] = useState<"buy" | "sell">(
+    location.state?.tab === "sell" ? "sell" : "buy"
+  );
+  const [items, setItems] = useState<MaterialSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
-    async function fetchList() {
+  const observer = useRef<IntersectionObserver | null>(null);
+
+  const fetchMaterials = useCallback(
+    async (page: number, currentTab: "buy" | "sell") => {
+      setLoading(true);
+      setErrorMsg(null);
       try {
-        setLoading(true);
-        setErrorMsg(null);
+        const apiCall =
+          currentTab === "buy"
+            ? getMyDownloadedMaterials
+            : getMyUploadedMaterials;
+        const response = await apiCall(page);
 
-        const listRes =
-          tab === "buy"
-            ? await getMyDownloadedMaterials(1)
-            : await getMyUploadedMaterials(1);
-        const lightList = Array.isArray(listRes?.materials)
-          ? listRes.materials
-          : [];
-        const details = await Promise.all(
-          lightList.map((m) => getMaterial(m.id))
-        );
-
-        if (mounted) setItems(details);
-      } catch (e: any) {
-        if (mounted) {
-          setItems([]);
-          setErrorMsg(e?.message || "목록을 불러오지 못했습니다.");
+        if (response.materials) {
+          setItems((prevItems) =>
+            page === 1 ? response.materials : [...prevItems, ...response.materials],
+          );
+          setTotalPages(response.pageInfo.totalPages);
         }
+      } catch (e: any) {
+        setErrorMsg(e?.message || "목록을 불러오지 못했습니다.");
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
-    }
+    },
+    [],
+  );
 
-    fetchList();
-    return () => {
-      mounted = false;
-    };
-  }, [tab]);
+  useEffect(() => {
+    setItems([]);
+    setCurrentPage(1);
+    setTotalPages(1);
+    fetchMaterials(1, tab);
+  }, [tab, fetchMaterials]);
 
   const onOpenDetail = (id: number) => navigate(`/data/${id}`);
   const onEdit = (id: number) => navigate(`/data/edit/${id}`);
@@ -141,7 +150,8 @@ export default function Data(): React.JSX.Element {
       if (window.confirm("정말로 삭제하시겠습니까?")) {
         try {
           await deleteMaterial(id);
-          setItems((prev) => prev.filter((v) => v.materialId !== id));
+          setItems((prev) => prev.filter((v) => v.id !== id));
+          alert("자료가 삭제되었습니다.");
         } catch (error) {
           console.error("Failed to delete material:", error);
           alert("자료 삭제에 실패했습니다.");
@@ -149,11 +159,31 @@ export default function Data(): React.JSX.Element {
       }
     } else {
       // 자료 구매 내역 삭제 API 추가 시 연동
-      setItems((prev) => prev.filter((v) => v.materialId !== id));
+      setItems((prev) => prev.filter((v) => v.id !== id));
     }
   };
 
-  const showList = useMemo(() => items, [items]);
+  const handleLoadMore = () => {
+    if (currentPage < totalPages && !loading) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      fetchMaterials(nextPage, tab);
+    }
+  };
+
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && currentPage < totalPages) {
+          handleLoadMore();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, currentPage, totalPages, handleLoadMore],
+  );
 
   return (
     <div className="max-w-6xl py-7.5 mx-auto flex justify-center items-start gap-16.25">
@@ -174,30 +204,48 @@ export default function Data(): React.JSX.Element {
 
       {/* 목록 영역 */}
       <div className="w-235 bg-transparent rounded-xl flex flex-col justify-start items-center gap-7.5">
-        {loading && (
-          <div className="body-md text-primary-600">불러오는 중…</div>
-        )}
         {errorMsg && <div className="body-md text-red-600">{errorMsg}</div>}
 
-        {!loading && !errorMsg && (
+        {!errorMsg && (
           <div className="w-full flex flex-col gap-5">
-            {showList.length > 0 ? (
-              showList.map((it) => (
-                <DocRow
-                  key={it.materialId}
-                  item={it}
-                  tab={tab}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onOpenDetail={onOpenDetail}
-                />
-              ))
+            {items.length > 0 ? (
+              items.map((item, index) => {
+                if (items.length === index + 1) {
+                  return (
+                    <div ref={lastElementRef} key={item.id}>
+                      <DocRow
+                        item={item}
+                        tab={tab}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onOpenDetail={onOpenDetail}
+                      />
+                    </div>
+                  );
+                }
+                return (
+                  <DocRow
+                    key={item.id}
+                    item={item}
+                    tab={tab}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onOpenDetail={onOpenDetail}
+                  />
+                );
+              })
             ) : (
-              <div className="body-md text-[#5B5B5B]">
-                표시할 자료가 없습니다.
-              </div>
+              !loading && (
+                <div className="body-md text-primary-600">
+                  표시할 자료가 없습니다.
+                </div>
+              )
             )}
           </div>
+        )}
+
+        {loading && (
+          <div className="body-md text-primary-600">불러오는 중…</div>
         )}
       </div>
     </div>

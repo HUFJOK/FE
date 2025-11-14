@@ -28,8 +28,13 @@ export default function ReviewBox({
         </div>
         {isAuthor && (
           <div className="flex justify-start items-center gap-2.5 caption text-primary-600">
-            <div className="cursor-pointer" onClick={onEdit}>수정</div>|
-            <div className="cursor-pointer" onClick={onDelete}>삭제</div>
+            <div className="cursor-pointer" onClick={onEdit}>
+              수정
+            </div>
+            |
+            <div className="cursor-pointer" onClick={onDelete}>
+              삭제
+            </div>
           </div>
         )}
       </div>

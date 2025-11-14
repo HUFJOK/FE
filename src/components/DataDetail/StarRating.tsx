@@ -16,7 +16,8 @@ export default function StarRating({
     stars.push(
       <AiFillStar
         key={i}
-        className={`w-4 h-4 ${isFilled ? "text-primary-600" : "text-gray-400"}`}
+        size={16}
+        className={`${isFilled ? "text-primary-600" : "text-gray-400"}`}
       />,
     );
   }

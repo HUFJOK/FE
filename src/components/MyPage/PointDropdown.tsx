@@ -54,9 +54,9 @@ export default function PointDropdown({
       >
         <div>{point}P</div>
         {isOpen ? (
-          <BiChevronUp className="w-6 h-6 text-primary-700" />
+          <BiChevronUp size={24} className="text-primary-700" />
         ) : (
-          <BiChevronDown className="w-6 h-6 text-primary-700" />
+          <BiChevronDown size={24} className="text-primary-700" />
         )}
       </div>
 

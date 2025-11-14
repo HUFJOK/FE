@@ -25,6 +25,7 @@ export default function Dropdown({
 }: DropdownProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isTitleFont: boolean = font.startsWith("title");
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent): void => {
@@ -58,7 +59,7 @@ export default function Dropdown({
     <div className="relative w-full min-w-30" ref={dropdownRef}>
       <div
         className={`
-          px-5 py-2.5 flex justify-between items-center border rounded-xl ${font} text-gray-700 whitespace-nowrap
+          ${isTitleFont ? "p-5" : "px-5 py-2.5"} flex justify-between items-center border rounded-xl ${font} text-gray-700 whitespace-nowrap
           ${
             !disabled
               ? isOpen
@@ -74,9 +75,9 @@ export default function Dropdown({
         {!disabled && (
           <>
             {isOpen ? (
-              <BiChevronUp className="w-6 h-6 text-primary-700" />
+              <BiChevronUp size={24} className="text-primary-700" />
             ) : (
-              <BiChevronDown className="w-6 h-6 text-primary-700" />
+              <BiChevronDown size={24} className="text-primary-700" />
             )}
           </>
         )}

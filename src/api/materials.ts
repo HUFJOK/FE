@@ -11,10 +11,10 @@ import { formatDateTime } from "./utils";
 
 // 특정 자료 상세 조회
 export const getMaterial = async (
-  materialId: number
+  materialId: number,
 ): Promise<MaterialGetResponse> => {
   const response = await apiClient.get<MaterialGetResponse>(
-    `/api/v1/materials/${materialId}`
+    `/api/v1/materials/${materialId}`,
   );
 
   response.data.createdAt = formatDateTime(response.data.createdAt);
@@ -25,11 +25,11 @@ export const getMaterial = async (
 // 자료 수정 (수정 필요)
 export const updateMaterial = async (
   materialId: number,
-  data: MaterialRequest
+  data: MaterialRequest,
 ): Promise<MaterialUpdateResponse> => {
   const response = await apiClient.put<MaterialUpdateResponse>(
     `/api/v1/materials/${materialId}`,
-    data
+    data,
   );
 
   response.data.updatedAt = formatDateTime(response.data.updatedAt);
@@ -54,7 +54,7 @@ export const getMaterials = async (params?: {
     "/api/v1/materials",
     {
       params: safeParams,
-    }
+    },
   );
   return response.data;
 };
@@ -62,7 +62,7 @@ export const getMaterials = async (params?: {
 // 새 자료 작성 및 파일 업로드
 export const createMaterial = async (
   metadata: MaterialRequest,
-  files: File[]
+  files: File[],
 ): Promise<MaterialCreateResponse> => {
   const formData = new FormData();
 
@@ -71,7 +71,7 @@ export const createMaterial = async (
     "metadata",
     new Blob([JSON.stringify(metadata)], {
       type: "application/json",
-    })
+    }),
   );
 
   // 파일 목록 추가
@@ -86,7 +86,7 @@ export const createMaterial = async (
       headers: {
         "Content-Type": undefined,
       },
-    }
+    },
   );
 
   response.data.createdAt = formatDateTime(response.data.createdAt);
@@ -95,10 +95,10 @@ export const createMaterial = async (
 
 // 자료 구매
 export const purchaseMaterial = async (
-  materialId: number
+  materialId: number,
 ): Promise<HttpErrorResponse> => {
   const response = await apiClient.post<HttpErrorResponse>(
-    `/api/v1/materials/${materialId}/purchase`
+    `/api/v1/materials/${materialId}/purchase`,
   );
   return response.data;
 };
@@ -106,14 +106,14 @@ export const purchaseMaterial = async (
 // 자료 파일 다운로드
 export const downloadMaterial = async (
   materialId: number,
-  attachmentId: number
+  attachmentId: number,
 ): Promise<{ blob: Blob; filename: string } | HttpErrorResponse> => {
   try {
     const response = await apiClient.get<Blob>(
       `/api/v1/materials/${materialId}/download/${attachmentId}`,
       {
         responseType: "blob",
-      }
+      },
     );
 
     const contentDisposition = response.headers["content-disposition"];
