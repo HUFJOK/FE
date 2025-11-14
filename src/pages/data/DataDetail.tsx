@@ -10,7 +10,7 @@ import ReviewBox from "../../components/DataDetail/ReviewBox";
 import type { MaterialGetResponse, UserResponse, ReviewResponse, ReviewCreateRequest, ReviewUpdateRequest } from "../../api/types";
 import { deleteMaterial, downloadMaterial, getMaterial, purchaseMaterial } from "../../api/materials";
 import { createReview, updateReview, deleteReview, getReviews } from "../../api/reviews";
-import { getMyDownloadedMaterials, getUser } from "../../api/users";
+import { checkMyDownloadedMaterials, getUser } from "../../api/users";
 import { usePointStore } from "../../store/pointStore";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -44,22 +44,21 @@ export default function DataDetail(): React.JSX.Element {
       try {
         setIsLoading(true);
 
-        const [materialData, reviewsData, userData, purchasedData] = await Promise.all([
+        const [materialData, reviewsData, userData] = await Promise.all([
           getMaterial(materialId),
           getReviews(materialId),
           getUser(),
-          getMyDownloadedMaterials(),
         ]);
 
         setMaterial(materialData);
         setCurrentUser(userData);
 
-        if (userData && materialData) {
-          setIsAuthor(userData.nickname === materialData.authorName);
-        }
+        const isAuthor = userData?.nickname === materialData?.authorName;
+        setIsAuthor(isAuthor);
 
-        if (purchasedData.materials.some((m) => m.id === materialId)) {
-          setIsPurchased(true);
+        if (!isAuthor) {
+          const purchased = await checkMyDownloadedMaterials(materialId);
+          setIsPurchased(purchased);
         }
 
         const myReviewData = reviewsData.find((review) => review.author === true);
@@ -95,7 +94,7 @@ export default function DataDetail(): React.JSX.Element {
         const file = await downloadMaterial(material.materialId, attachment.id);
 
         if ("blob" in file) {
-          saveAs(file.blob, file.filename);
+          saveAs(file.blob, attachment.originalFileName);
         } else {
           throw new Error(file.error || "파일을 다운로드하는 데 실패했습니다.");
         }

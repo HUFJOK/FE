@@ -1,44 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useLocation, useNavigate } from "react-router-dom";
+import Button from "../../components/Button";
 import {
   getMyDownloadedMaterials,
   getMyUploadedMaterials,
 } from "../../api/users";
-import { getMaterial } from "../../api/materials";
+import { deleteMaterial, getMaterial } from "../../api/materials";
 import type { MaterialGetResponse } from "../../api/types";
-
-// 학기 표기 형식 
-const formatSemester = (n?: number) =>
-  typeof n === "number" ? `${n}학기` : "-";
-
-/** 좌측 카테고리 버튼 */
-function CategoryButton({
-  active,
-  children,
-  onClick,
-}: {
-  active?: boolean;
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        "inline-flex items-center justify-center",
-        "w-[145px] h-[53px] rounded-[12px]",
-        "title-sm",
-        active
-          ? "bg-primary-600 text-white"
-          : "bg-white text-primary-600 border-2 border-primary-600",
-      ].join(" ")}
-    >
-      {children}
-    </button>
-  );
-}
 
 /** 우측 하단 버튼*/
 function RowButton({
@@ -76,8 +44,7 @@ function DocRow({
   onDelete: (id: number) => void;
   onOpenDetail: (id: number) => void;
 }) {
-  const yearText = typeof item.year === "number" ? `${item.year}년` : "-";
-  const semesterText = formatSemester(item.semester);
+  const professorText = item.professorName + " 교수님";
 
   return (
     <article
@@ -89,25 +56,18 @@ function DocRow({
           {/* 제목 */}
           <h3 className="title-sm mb-[10px]">{item.title}</h3>
 
-          {/* 구매 탭: 연도-학기, 학년, 전공, 교수님, 구분, 과목 */}
+          {/* 구매 탭: 연도-학기, 학년, 전공, 교수님, 구분 */}
           {tab === "buy" && (
-            <p className="body-sm text-[#5B5B5B]">
-              {yearText} &nbsp; {semesterText} &nbsp;
-              학년: {item.grade || "-"} &nbsp;
-              {/* MaterialGetResponse 에 major 없음*/}
-              전공: {"-"} &nbsp;
-              구분: {item.courseDivision || "-"} &nbsp;
-              교수: {item.professorName || "-"} &nbsp;
-              과목: {item.courseName || "-"}
+            <p className="body-sm text-gray-600">
+              {item.year}-{item.semester} &nbsp; {item.grade || "-"} &nbsp;
+              {item.major || "-"} &nbsp; {professorText} &nbsp; {item.courseDivision || "-"}
             </p>
           )}
 
           {/* 판매 탭: 다운로드수, 리뷰수, 가격 */}
           {tab === "sell" && (
-            <p className="body-sm text-[#5B5B5B]">
-              다운로드수 {item.downloadCount ?? 0}회
-              &nbsp; 리뷰 {item.reviewCount ?? 0}개
-              &nbsp; 가격 200P
+            <p className="body-sm text-gray-600">
+              다운로드 {item.downloadCount ?? 0}회 &nbsp; 리뷰 {item.reviewCount ?? 0}개 &nbsp; 가격 200P
             </p>
           )}
         </div>
@@ -128,10 +88,11 @@ function DocRow({
   );
 }
 
-export default function MyData(): React.JSX.Element {
+export default function Data(): React.JSX.Element {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [tab, setTab] = useState<"buy" | "sell">("buy");
+  const [tab, setTab] = useState<"buy" | "sell">(location.state?.tab === "sell" ? "sell" : "buy");
   const [items, setItems] = useState<MaterialGetResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -152,7 +113,7 @@ export default function MyData(): React.JSX.Element {
           ? listRes.materials
           : [];
         const details = await Promise.all(
-          lightList.map((m) => getMaterial(m.id)),
+          lightList.map((m) => getMaterial(m.id))
         );
 
         if (mounted) setItems(details);
@@ -173,21 +134,42 @@ export default function MyData(): React.JSX.Element {
   }, [tab]);
 
   const onOpenDetail = (id: number) => navigate(`/data/${id}`);
-  const onEdit = (id: number) => navigate("/data/upload", { state: { id } });
-  const onDelete = (id: number) =>
-    setItems((prev) => prev.filter((v) => v.materialId !== id));
+  const onEdit = (id: number) => navigate(`/data/edit/${id}`);
+
+  const onDelete = async (id: number) => {
+    if (tab === "sell") {
+      if (window.confirm("정말로 삭제하시겠습니까?")) {
+        try {
+          await deleteMaterial(id);
+          setItems((prev) => prev.filter((v) => v.materialId !== id));
+        } catch (error) {
+          console.error("Failed to delete material:", error);
+          alert("자료 삭제에 실패했습니다.");
+        }
+      }
+    } else {
+      // 자료 구매 내역 삭제 API 추가 시 연동
+      setItems((prev) => prev.filter((v) => v.materialId !== id));
+    }
+  };
 
   const showList = useMemo(() => items, [items]);
 
   return (
     <div className="max-w-6xl py-7.5 mx-auto flex justify-center items-start gap-16.25">
       <div className="flex flex-col gap-6.25">
-        <CategoryButton active={tab === "buy"} onClick={() => setTab("buy")}>
-          구매 족보
-        </CategoryButton>
-        <CategoryButton active={tab === "sell"} onClick={() => setTab("sell")}>
-          판매 족보
-        </CategoryButton>
+        <Button
+          text="구매 족보"
+          font="title-sm"
+          isOutline={tab !== "buy"}
+          onClick={() => setTab("buy")}
+        />
+        <Button
+          text="판매 족보"
+          font="title-sm"
+          isOutline={tab !== "sell"}
+          onClick={() => setTab("sell")}
+        />
       </div>
 
       {/* 목록 영역 */}
